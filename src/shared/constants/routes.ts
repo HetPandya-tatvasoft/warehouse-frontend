@@ -3,6 +3,7 @@ export const PAGE_ROUTES = {
   DASHBOARD: "/dashboard",
   ROLES: "/roles",
   USERS: "/users",
+  UNAUTHORIZED: "/unauthorized",
 } as const;
 
 export const PUBLIC_ROUTES = [PAGE_ROUTES.LOGIN];

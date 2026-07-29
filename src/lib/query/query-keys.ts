@@ -7,6 +7,7 @@ export const queryKeys = {
     all: () => ["roles"] as const,
     list: <T extends object>(params?: T) => ["roles", "list", params] as const,
     detail: (id: string) => ["roles", "detail", id] as const,
+    pageRights: (roleId: string) => ["roles", "page-rights", roleId] as const,
   },
 
   users: {

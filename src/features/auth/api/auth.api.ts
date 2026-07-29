@@ -1,5 +1,5 @@
 import { apiClient, refreshClient } from "@/lib/api/axios-instance";
-import type { ICurrentUser, ILoginDto } from "../types/auth.types";
+import type { ICurrentUser, IAuthUser, ILoginDto } from "../types/auth.types";
 import type { IApiSuccessResponse } from "@/types/api.types";
 import { API_ROUTES } from "@/shared/constants/api";
 
@@ -10,8 +10,8 @@ export const authApi = {
   me,
 };
 
-async function login(data: ILoginDto): Promise<IApiSuccessResponse<ICurrentUser>> {
-  const response = await apiClient.post<IApiSuccessResponse<ICurrentUser>>(
+async function login(data: ILoginDto): Promise<IApiSuccessResponse<IAuthUser>> {
+  const response = await apiClient.post<IApiSuccessResponse<IAuthUser>>(
     API_ROUTES.LOGIN,
     data
   );
@@ -25,8 +25,8 @@ async function logout(): Promise<IApiSuccessResponse<null>> {
   return response.data;
 }
 
-async function refreshToken(): Promise<IApiSuccessResponse<ICurrentUser>> {
-  const response = await refreshClient.post<IApiSuccessResponse<ICurrentUser>>(
+async function refreshToken(): Promise<IApiSuccessResponse<IAuthUser>> {
+  const response = await refreshClient.post<IApiSuccessResponse<IAuthUser>>(
     API_ROUTES.REFRESH_TOKEN
   );
 
@@ -38,3 +38,4 @@ async function me(): Promise<IApiSuccessResponse<ICurrentUser>> {
   );
   return response.data;
 }
+

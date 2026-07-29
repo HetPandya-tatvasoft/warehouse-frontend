@@ -1,5 +1,6 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
+import { toast } from "sonner";
 
 import { apiClient, refreshClient } from "./axios-instance";
 import type { IRetryAxiosRequestConfig } from "@/types/api.types";
@@ -30,6 +31,18 @@ export function setupAuthInterceptor() {
       const originalRequest = error.config as IRetryAxiosRequestConfig;
 
       if (!originalRequest) {
+        return Promise.reject(error);
+      }
+
+      if (error.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          if (originalRequest.method?.toLowerCase() === "get") {
+            // replace to prevent back button loop where it reverts back to that unauthorized page only
+            window.location.replace("/unauthorized");
+          } else {
+            toast.error("You do not have permission to perform this action.");
+          }
+        }
         return Promise.reject(error);
       }
 
@@ -72,7 +85,7 @@ export function setupAuthInterceptor() {
 
         return Promise.reject(refreshError);
       }
-    }
+    },
   );
 }
 

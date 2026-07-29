@@ -3,14 +3,21 @@
 import { useUser } from "@/features/users/queries/users.queries";
 import { UserForm } from "@/features/users/components/user-form";
 import { useParams } from "next/navigation";
+import { usePermissions, Page, Permission } from "@/permissions";
+import { Unauthorized } from "@/components/common/Unauthorized";
 
 export default function EditUserPage() {
   const params = useParams();
   const id = params?.id as string;
 
-  const { data, isLoading, isError } = useUser(id);
+  const { can, isLoading: isAuthLoading } = usePermissions();
+  const hasUpdatePermission = can(Page.Users, Permission.UPDATE);
 
-  if (isLoading) {
+  const { data, isLoading, isError } = useUser(id, {
+    enabled: hasUpdatePermission && !isAuthLoading,
+  });
+
+  if (isAuthLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="animate-pulse space-y-2 text-center">
@@ -20,6 +27,10 @@ export default function EditUserPage() {
         </div>
       </div>
     );
+  }
+
+  if (!hasUpdatePermission) {
+    return <Unauthorized />;
   }
 
   if (isError || !data) {

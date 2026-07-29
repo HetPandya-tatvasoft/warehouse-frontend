@@ -23,11 +23,14 @@ import {
 } from "@/features/auth/queries/auth.queries";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/lib/utils";
+import { usePermissions, Page, Permission } from "@/permissions";
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  page?: Page;
+  permission?: Permission;
 }
 
 const navItems: NavItem[] = [
@@ -40,11 +43,15 @@ const navItems: NavItem[] = [
     label: "Users",
     href: PAGE_ROUTES.USERS,
     icon: Users,
+    page: Page.Users,
+    permission: Permission.VIEW,
   },
   {
     label: "Roles",
     href: PAGE_ROUTES.ROLES,
     icon: ShieldCheck,
+    page: Page.Roles,
+    permission: Permission.VIEW,
   },
 ];
 
@@ -55,6 +62,7 @@ export function AppSidebar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: user } = useCurrentUser();
+  const { can } = usePermissions();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const handleLogout = () => {
@@ -135,35 +143,37 @@ export function AppSidebar() {
           <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
             Navigation
           </div>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+          {navItems
+            .filter((item) => !item.page || !item.permission || can(item.page, item.permission))
+            .map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMobileNav}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
-                  isActive
-                    ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
-                )}
-              >
-                <Icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileNav}
                   className={cn(
-                    "w-5 h-5 transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
                     isActive
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
+                      ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
                   )}
-                />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+                >
+                  <Icon
+                    className={cn(
+                      "w-5 h-5 transition-colors",
+                      isActive
+                        ? "text-indigo-600 dark:text-indigo-400"
+                        : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
+                    )}
+                  />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
         </nav>
 
         {/* User Info & Logout Footer */}

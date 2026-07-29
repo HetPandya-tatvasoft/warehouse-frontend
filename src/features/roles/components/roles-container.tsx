@@ -1,21 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { Key, Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
 import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
+import { Unauthorized } from "@/components/common/Unauthorized";
 
 import { useDeleteRole, useRoles } from "../queries/roles.queries";
 import type { IRole, RoleSortField, SortOrder } from "../types/roles.types";
 import { RoleFormModal } from "./role-form-modal";
+import { usePermissions, Page, Permission } from "@/permissions";
 
 function formatDate(dateString: string): string {
   try {
@@ -27,7 +29,11 @@ function formatDate(dateString: string): string {
 
 export function RolesContainer() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const updateQueryParams = useUpdateQueryParams();
+
+  const { can, isLoading: isAuthLoading } = usePermissions();
+  const hasViewPermission = can(Page.Roles, Permission.VIEW);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<IRole | null>(
@@ -47,6 +53,8 @@ export function RolesContainer() {
     pageSize,
     sortBy,
     sortOrder,
+  }, {
+    enabled: hasViewPermission && !isAuthLoading
   });
 
   const { mutate: deleteRole, isPending: isDeleting } = useDeleteRole();
@@ -61,20 +69,20 @@ export function RolesContainer() {
     }
   }, [isError, error]);
 
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = useCallback(() => {
     setSelectedRoleForEdit(null);
     setIsFormModalOpen(true);
-  };
+  }, []);
 
-  const handleOpenEditModal = (role: IRole) => {
+  const handleOpenEditModal = useCallback((role: IRole) => {
     setSelectedRoleForEdit(role);
     setIsFormModalOpen(true);
-  };
+  }, []);
 
-  const handleOpenDeleteConfirm = (role: IRole) => {
+  const handleOpenDeleteConfirm = useCallback((role: IRole) => {
     setDeletingRole(role);
     setIsConfirmDeleteOpen(true);
-  };
+  }, []);
 
   const handleConfirmDelete = () => {
     if (!deletingRole) return;
@@ -95,80 +103,119 @@ export function RolesContainer() {
     });
   };
 
-  const columns = useMemo<ColumnDef<IRole>[]>(
-    () => [
-      {
-        accessorKey: "name",
-        header: "Role Name",
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground">
-              <Shield className="size-4" />
-            </div>
-            <span className="font-medium text-foreground">
-              {row.original.name}
-            </span>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "description",
-        header: "Description",
-        enableSorting: false,
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">
-            {row.original.description || "-"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Created At",
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">
-            {formatDate(row.original.createdAt)}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "updatedAt",
-        header: "Updated At",
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">
-            {formatDate(row.original.updatedAt)}
-          </span>
-        ),
-      },
-      {
-        id: "actions",
-        header: () => <div className="text-right">Actions</div>,
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <UIButton
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label="Edit role"
-              onClick={() => handleOpenEditModal(row.original)}
-            >
-              <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
-            </UIButton>
-            <UIButton
-              variant="ghost"
-              size="icon"
-              className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              aria-label="Delete role"
-              onClick={() => handleOpenDeleteConfirm(row.original)}
-            >
-              <Trash2 className="size-4" />
-            </UIButton>
-          </div>
-        ),
-      },
-    ],
-    [],
+  const handleManagePermissions = useCallback(
+    (roleId: string) => {
+      router.push(`/roles/${roleId}/permissions`);
+    },
+    [router],
   );
+
+  const columns = useMemo<ColumnDef<IRole>[]>(
+    () => {
+      const hasUpdatePermission = can(Page.Roles, Permission.UPDATE);
+      const hasDeletePermission = can(Page.Roles, Permission.DELETE);
+
+      return [
+        {
+          accessorKey: "name",
+          header: "Role Name",
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <Shield className="size-4" />
+              </div>
+              <span className="font-medium text-foreground">
+                {row.original.name}
+              </span>
+            </div>
+          ),
+        },
+        {
+          accessorKey: "description",
+          header: "Description",
+          enableSorting: false,
+          cell: ({ row }) => (
+            <span className="text-muted-foreground">
+              {row.original.description || "-"}
+            </span>
+          ),
+        },
+        {
+          accessorKey: "createdAt",
+          header: "Created At",
+          cell: ({ row }) => (
+            <span className="text-muted-foreground">
+              {formatDate(row.original.createdAt)}
+            </span>
+          ),
+        },
+        {
+          accessorKey: "updatedAt",
+          header: "Updated At",
+          cell: ({ row }) => (
+            <span className="text-muted-foreground">
+              {formatDate(row.original.updatedAt)}
+            </span>
+          ),
+        },
+        ...(hasUpdatePermission || hasDeletePermission
+          ? [
+              {
+                id: "actions",
+                header: () => <div className="text-right">Actions</div>,
+                enableSorting: false,
+                cell: ({ row }: { row: { original: IRole } }) => (
+                  <div className="flex items-center justify-end gap-1">
+                    {hasUpdatePermission && (
+                      <>
+                        <UIButton
+                          variant="ghost"
+                          size="icon"
+                          className="size-8"
+                          aria-label="Manage permissions"
+                          onClick={() => handleManagePermissions(row.original.id)}
+                        >
+                          <Key className="size-4 text-muted-foreground hover:text-foreground" />
+                        </UIButton>
+                        <UIButton
+                          variant="ghost"
+                          size="icon"
+                          className="size-8"
+                          aria-label="Edit role"
+                          onClick={() => handleOpenEditModal(row.original)}
+                        >
+                          <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
+                        </UIButton>
+                      </>
+                    )}
+                    {hasDeletePermission && (
+                      <UIButton
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        aria-label="Delete role"
+                        onClick={() => handleOpenDeleteConfirm(row.original)}
+                      >
+                        <Trash2 className="size-4" />
+                      </UIButton>
+                    )}
+                  </div>
+                ),
+              },
+            ]
+          : []),
+      ];
+    },
+    [handleManagePermissions, can, handleOpenEditModal, handleOpenDeleteConfirm],
+  );
+
+  if (isAuthLoading) {
+    return <div className="p-8 text-center text-sm text-zinc-500">Loading session...</div>;
+  }
+
+  if (!hasViewPermission) {
+    return <Unauthorized />;
+  }
 
   return (
     <div className="space-y-6">
@@ -182,12 +229,14 @@ export function RolesContainer() {
             Manage system roles, tenant scope, and access control rights.
           </p>
         </div>
-        <UIButton
-          leftIcon={<Plus className="size-4" />}
-          onClick={handleOpenCreateModal}
-        >
-          Add New Role
-        </UIButton>
+        {can(Page.Roles, Permission.CREATE) && (
+          <UIButton
+            leftIcon={<Plus className="size-4" />}
+            onClick={handleOpenCreateModal}
+          >
+            Add New Role
+          </UIButton>
+        )}
       </div>
 
       {/* Table with Server-Side Pagination */}

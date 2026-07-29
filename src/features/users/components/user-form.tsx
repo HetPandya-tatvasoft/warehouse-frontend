@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -36,21 +36,11 @@ export function UserForm({ mode, user }: UserFormProps) {
 
   const availableRoles = (rolesData?.items || []) as IUserRole[];
 
-  const createForm = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<CreateUserFormValues>({
+    resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema) as unknown as Resolver<CreateUserFormValues>,
     defaultValues: {
       email: "",
       password: "",
-      firstName: "",
-      lastName: "",
-      roleIds: [],
-      isActive: true,
-    },
-  });
-
-  const updateForm = useForm<UpdateUserFormValues>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
       firstName: "",
       lastName: "",
       roleIds: [],
@@ -65,18 +55,26 @@ export function UserForm({ mode, user }: UserFormProps) {
 
   useEffect(() => {
     if (isEditing && user) {
-      updateForm.reset({
+      form.reset({
+        email: user.email,
+        password: "", // Not modified/shown during editing
         firstName: user.firstName,
         lastName: user.lastName,
         roleIds: user.roles?.map((r) => r.id) || [],
         isActive: user.isActive,
       });
     }
-  }, [isEditing, user, updateForm]);
+  }, [isEditing, user, form]);
 
-  const selectedRoleIds = isEditing
-    ? updateForm.watch("roleIds") || []
-    : createForm.watch("roleIds") || [];
+  const selectedRoleIds = useWatch({
+    control: form.control,
+    name: "roleIds",
+  }) || [];
+
+  const isActiveValue = useWatch({
+    control: form.control,
+    name: "isActive",
+  });
 
   const handleRoleToggle = (roleId: string) => {
     const currentRoleIds = selectedRoleIds;
@@ -84,31 +82,33 @@ export function UserForm({ mode, user }: UserFormProps) {
       ? currentRoleIds.filter((id) => id !== roleId)
       : [...currentRoleIds, roleId];
 
-    if (isEditing) {
-      updateForm.setValue("roleIds", newRoleIds, { shouldValidate: true });
-    } else {
-      createForm.setValue("roleIds", newRoleIds, { shouldValidate: true });
-    }
+    form.setValue("roleIds", newRoleIds, { shouldValidate: true });
   };
 
   const saveUser = (
-    payload: CreateUserFormValues | UpdateUserFormValues,
+    payload: CreateUserFormValues,
     options: {
       onSuccess: () => void;
       onError: (error: unknown) => void;
     },
   ) => {
     if (isEditing && user) {
+      const updatePayload: UpdateUserFormValues = {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        roleIds: payload.roleIds,
+        isActive: payload.isActive,
+      };
       updateUser(
-        { id: user.id, payload: payload as UpdateUserFormValues },
+        { id: user.id, payload: updatePayload },
         options,
       );
     } else {
-      createUser(payload as CreateUserFormValues, options);
+      createUser(payload, options);
     }
   };
 
-  const onSubmit = (formData: CreateUserFormValues | UpdateUserFormValues) => {
+  const onSubmit = (formData: CreateUserFormValues) => {
     saveUser(formData, {
       onSuccess: () => {
         toast.success(
@@ -131,9 +131,7 @@ export function UserForm({ mode, user }: UserFormProps) {
     });
   };
 
-  const roleError = isEditing
-    ? updateForm.formState.errors.roleIds?.message
-    : createForm.formState.errors.roleIds?.message;
+  const roleError = form.formState.errors.roleIds?.message;
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xs overflow-hidden">
@@ -149,11 +147,7 @@ export function UserForm({ mode, user }: UserFormProps) {
       </div>
 
       <form
-        onSubmit={
-          isEditing
-            ? updateForm.handleSubmit(onSubmit)
-            : createForm.handleSubmit(onSubmit)
-        }
+        onSubmit={form.handleSubmit(onSubmit)}
         className="p-6 space-y-6"
       >
         {!isEditing && (
@@ -163,9 +157,9 @@ export function UserForm({ mode, user }: UserFormProps) {
               type="email"
               required
               placeholder="e.g. user@organization.com"
-              error={createForm.formState.errors.email?.message}
+              error={form.formState.errors.email?.message}
               disabled={isPending}
-              {...createForm.register("email")}
+              {...form.register("email")}
             />
 
             <UIInput
@@ -173,9 +167,9 @@ export function UserForm({ mode, user }: UserFormProps) {
               type="password"
               required
               placeholder="At least 8 characters"
-              error={createForm.formState.errors.password?.message}
+              error={form.formState.errors.password?.message}
               disabled={isPending}
-              {...createForm.register("password")}
+              {...form.register("password")}
             />
           </div>
         )}
@@ -185,30 +179,18 @@ export function UserForm({ mode, user }: UserFormProps) {
             label="First Name"
             required
             placeholder="John"
-            error={
-              isEditing
-                ? updateForm.formState.errors.firstName?.message
-                : createForm.formState.errors.firstName?.message
-            }
+            error={form.formState.errors.firstName?.message}
             disabled={isPending}
-            {...(isEditing
-              ? updateForm.register("firstName")
-              : createForm.register("firstName"))}
+            {...form.register("firstName")}
           />
 
           <UIInput
             label="Last Name"
             required
             placeholder="Doe"
-            error={
-              isEditing
-                ? updateForm.formState.errors.lastName?.message
-                : createForm.formState.errors.lastName?.message
-            }
+            error={form.formState.errors.lastName?.message}
             disabled={isPending}
-            {...(isEditing
-              ? updateForm.register("lastName")
-              : createForm.register("lastName"))}
+            {...form.register("lastName")}
           />
         </div>
 
@@ -269,17 +251,9 @@ export function UserForm({ mode, user }: UserFormProps) {
             type="checkbox"
             id="isActive"
             disabled={isPending}
-            checked={
-              isEditing
-                ? updateForm.watch("isActive")
-                : createForm.watch("isActive")
-            }
+            checked={Boolean(isActiveValue)}
             onChange={(e) => {
-              if (isEditing) {
-                updateForm.setValue("isActive", e.target.checked);
-              } else {
-                createForm.setValue("isActive", e.target.checked);
-              }
+              form.setValue("isActive", e.target.checked);
             }}
             className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4"
           />
@@ -301,10 +275,7 @@ export function UserForm({ mode, user }: UserFormProps) {
           >
             Cancel
           </UIButton>
-          <UIButton
-            type="submit"
-            loading={isPending}
-          >
+          <UIButton type="submit" loading={isPending}>
             {isEditing ? "Save Changes" : "Create User"}
           </UIButton>
         </div>

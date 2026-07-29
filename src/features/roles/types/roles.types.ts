@@ -27,3 +27,27 @@ export interface IUpdateRolePayload {
   name?: string;
   description?: string;
 }
+
+export interface IPermission {
+  permissionId: string;
+  permissionName: string;
+  pageAccessId: string;
+  granted: boolean;
+}
+
+export interface IPageRight {
+  pageId: string;
+  pageName: string;
+  permissions: IPermission[];
+}
+
+export interface IRolePageRights {
+  roleId: string;
+  roleName: string;
+  pages: IPageRight[];
+}
+
+export interface IUpdateRolePageRightsPayload {
+  pageAccessIds: string[];
+}
+

@@ -45,7 +45,7 @@ export default function DashboardPage() {
             User ID
           </span>
           <p className="text-base font-mono font-semibold text-zinc-700 dark:text-zinc-300 truncate">
-            {data?.userId || "N/A"}
+            {data?.id || "N/A"}
           </p>
         </div>
       </div>

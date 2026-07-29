@@ -9,6 +9,8 @@ import type {
   IGetRolesParams,
   IRole,
   IUpdateRolePayload,
+  IRolePageRights,
+  IUpdateRolePageRightsPayload,
 } from "../types/roles.types";
 
 export const rolesApi = {
@@ -59,6 +61,29 @@ export const rolesApi = {
   deleteRole: async (id: string): Promise<IApiSuccessResponse<null>> => {
     const response = await apiClient.delete<IApiSuccessResponse<null>>(
       `${API_ROUTES.ROLES}/${id}`,
+    );
+    return response.data;
+  },
+
+  getRolePageRights: async (
+    roleId: string,
+  ): Promise<IApiSuccessResponse<IRolePageRights>> => {
+    const response = await apiClient.get<IApiSuccessResponse<IRolePageRights>>(
+      `${API_ROUTES.ROLES}/${roleId}/page-rights`,
+    );
+    return response.data;
+  },
+
+  updateRolePageRights: async ({
+    roleId,
+    payload,
+  }: {
+    roleId: string;
+    payload: IUpdateRolePageRightsPayload;
+  }): Promise<IApiSuccessResponse<null>> => {
+    const response = await apiClient.put<IApiSuccessResponse<null>>(
+      `${API_ROUTES.ROLES}/${roleId}/page-rights`,
+      payload,
     );
     return response.data;
   },

@@ -10,3 +10,5 @@ export * from "@/components/common/CommonTable";
 export * from "@/components/common/UIFileUpload";
 export * from "@/components/common/UIDatePicker";
 export * from "@/components/common/UIModal/UIModal";
+export * from "@/components/common/Unauthorized";
+

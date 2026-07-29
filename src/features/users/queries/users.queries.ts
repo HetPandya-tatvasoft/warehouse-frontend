@@ -33,12 +33,18 @@ function useUserMutation<TVariables>(
   });
 }
 
-export function useUsers(params?: IGetUsersParams) {
-  return useQuery(usersQueries.list(params));
+export function useUsers(params?: IGetUsersParams, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...usersQueries.list(params),
+    ...options,
+  });
 }
 
-export function useUser(id: string) {
-  return useQuery(usersQueries.detail(id));
+export function useUser(id: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    ...usersQueries.detail(id),
+    ...options,
+  });
 }
 
 export const useCreateUser = () => useUserMutation(usersApi.createUser);

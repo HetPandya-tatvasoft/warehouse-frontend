@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Pencil, Plus, Power } from "lucide-react";
+import { Pencil, Plus, Trash2, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -13,9 +13,11 @@ import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
+import { Unauthorized } from "@/components/common/Unauthorized";
 
 import { useToggleUserStatus, useUsers } from "../queries/users.queries";
 import type { IUser, UserSortField, SortOrder } from "../types/users.types";
+import { usePermissions, Page, Permission } from "@/permissions";
 
 function formatDate(dateString: string): string {
   try {
@@ -29,6 +31,9 @@ export function UsersContainer() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const updateQueryParams = useUpdateQueryParams();
+
+  const { can, isLoading: isAuthLoading } = usePermissions();
+  const hasViewPermission = can(Page.Users, Permission.VIEW);
 
   const [statusUser, setStatusUser] = useState<IUser | null>(null);
   const [isConfirmStatusOpen, setIsConfirmStatusOpen] = useState(false);
@@ -46,13 +51,18 @@ export function UsersContainer() {
     setSearchInput(search);
   }, [search]);
 
-  const { data, isLoading, isFetching, isError, error } = useUsers({
-    page,
-    pageSize,
-    sortBy,
-    sortOrder,
-    search: search || undefined,
-  });
+  const { data, isLoading, isFetching, isError, error } = useUsers(
+    {
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+      search: search || undefined,
+    },
+    {
+      enabled: hasViewPermission && !isAuthLoading,
+    },
+  );
 
   const { mutate: toggleStatus, isPending: isToggling } = useToggleUserStatus();
 
@@ -195,44 +205,67 @@ export function UsersContainer() {
           </span>
         ),
       },
-      {
-        id: "actions",
-        header: "Actions",
-        enableSorting: false,
-        cell: ({ row }) => {
-          const user = row.original;
-          return (
-            <div className="flex items-center gap-1.5">
-              <UIButton
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditUser(user)}
-                title="Edit User"
-                className="h-8 w-8 p-0"
-              >
-                <Pencil className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-              </UIButton>
+      ...(can(Page.Users, Permission.UPDATE)
+        ? [
+            {
+              id: "actions",
+              header: "Actions",
+              enableSorting: false,
+              cell: ({ row }: { row: { original: IUser } }) => {
+                const user = row.original;
+                return (
+                  <div className="flex items-center gap-1.5">
+                    <UIButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditUser(user)}
+                      title="Edit User"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+                    </UIButton>
 
-              <UIButton
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpenStatusConfirm(user)}
-                title={user.isActive ? "Deactivate User" : "Activate User"}
-                className={`h-8 w-8 p-0 ${
-                  user.isActive
-                    ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                    : "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                }`}
-              >
-                <Power className="h-4 w-4" />
-              </UIButton>
-            </div>
-          );
-        },
-      },
+                    <UIButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenStatusConfirm(user)}
+                      title={
+                        user.isActive ? "Deactivate User" : "Activate User"
+                      }
+                      className={`h-8 w-8 p-0 ${
+                        user.isActive
+                          ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                          : "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                      }`}
+                    >
+                      {user.isActive ? (
+                        <Trash2 className="h-4 w-4" />
+                      ) : (
+                        <UserCheck className="h-4 w-4" />
+                      )}
+                    </UIButton>
+                  </div>
+                );
+              },
+            },
+          ]
+        : []),
     ],
-    [handleEditUser, handleOpenStatusConfirm],
+    [can, handleEditUser, handleOpenStatusConfirm],
   );
+
+  // Its temporary, will remove after I make auth guard which will be there in layout
+  if (isAuthLoading) {
+    return (
+      <div className="p-8 text-center text-sm text-zinc-500">
+        Loading session...
+      </div>
+    );
+  }
+
+  if (!hasViewPermission) {
+    return <Unauthorized />;
+  }
 
   return (
     <div className="space-y-4">
@@ -257,13 +290,15 @@ export function UsersContainer() {
           {/* Space for future Role/Status filters */}
           <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
 
-          <UIButton
-            onClick={handleCreateUser}
-            className="flex items-center gap-2 h-9 text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add User</span>
-          </UIButton>
+          {can(Page.Users, Permission.CREATE) && (
+            <UIButton
+              onClick={handleCreateUser}
+              className="flex items-center gap-2 h-9 text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add User</span>
+            </UIButton>
+          )}
         </div>
       </div>
 
