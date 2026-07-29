@@ -18,7 +18,6 @@ export function CommonTableBody<TData>({
   const rows = table.getRowModel().rows;
   const visibleColumnsCount = table.getVisibleLeafColumns().length;
 
-  // Loading state
   if (isLoading) {
     return (
       <TableBody>
@@ -35,7 +34,6 @@ export function CommonTableBody<TData>({
     );
   }
 
-  // Empty state
   if (rows.length === 0) {
     return (
       <TableBody>
@@ -51,7 +49,6 @@ export function CommonTableBody<TData>({
     );
   }
 
-  // Actual rows
   return (
     <TableBody>
       {rows.map((row) => (

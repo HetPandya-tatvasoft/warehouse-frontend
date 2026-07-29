@@ -12,4 +12,6 @@ export enum Permission {
 }
 
 export { usePermissions } from "./use-permissions";
+export { PermissionGuard } from "./PermissionGuard";
+export type { PermissionGuardProps } from "./PermissionGuard";
 

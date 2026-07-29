@@ -12,12 +12,13 @@ import axios from "axios";
 import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
-import { Unauthorized } from "@/components/common/Unauthorized";
+import { UIInput } from "@/components/common/UIInput/UIInput";
 
 import { useDeleteRole, useRoles } from "../queries/roles.queries";
 import type { IRole, RoleSortField, SortOrder } from "../types/roles.types";
 import { RoleFormModal } from "./role-form-modal";
 import { usePermissions, Page, Permission } from "@/permissions";
+import { MESSAGES } from "@/shared/constants/messages";
 
 function formatDate(dateString: string): string {
   try {
@@ -32,8 +33,7 @@ export function RolesContainer() {
   const router = useRouter();
   const updateQueryParams = useUpdateQueryParams();
 
-  const { can, isLoading: isAuthLoading } = usePermissions();
-  const hasViewPermission = can(Page.Roles, Permission.VIEW);
+  const { can } = usePermissions();
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<IRole | null>(
@@ -47,24 +47,47 @@ export function RolesContainer() {
   const pageSize = Math.max(1, Number(searchParams.get("pageSize")) || 10);
   const sortBy = (searchParams.get("sortBy") as RoleSortField) || "createdAt";
   const sortOrder = (searchParams.get("sortOrder") as SortOrder) || "DESC";
+  const search = searchParams.get("search") || "";
 
-  const { data, isLoading, isFetching, isError, error } = useRoles({
-    page,
-    pageSize,
-    sortBy,
-    sortOrder,
-  }, {
-    enabled: hasViewPermission && !isAuthLoading
-  });
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSearchInput(search);
+  }, [search]);
+
+  // Common hook for debouncing  and searching
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== search) {
+        updateQueryParams({ search: searchInput, page: 1 });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, search, updateQueryParams]);
+
+  const { data, isLoading, isFetching, isError, error } = useRoles(
+    {
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+      search: search || undefined,
+    },
+    {
+      enabled: true,
+    },
+  );
 
   const { mutate: deleteRole, isPending: isDeleting } = useDeleteRole();
 
   useEffect(() => {
     if (isError) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Failed to fetch roles");
+        toast.error(error.response?.data?.message || MESSAGES.ROLES.LOAD_FAILED);
       } else {
-        toast.error("An unexpected error occurred while loading roles");
+        toast.error(MESSAGES.ROLES.LOAD_UNEXPECTED);
       }
     }
   }, [isError, error]);
@@ -95,9 +118,9 @@ export function RolesContainer() {
       },
       onError: (err) => {
         if (axios.isAxiosError(err)) {
-          toast.error(err.response?.data?.message || "Failed to delete role");
+          toast.error(err.response?.data?.message || MESSAGES.ROLES.DELETE_FAILED);
         } else {
-          toast.error("Something went wrong, failed to delete role");
+          toast.error(MESSAGES.ROLES.DELETE_FAILED_UNEXPECTED);
         }
       },
     });
@@ -110,133 +133,142 @@ export function RolesContainer() {
     [router],
   );
 
-  const columns = useMemo<ColumnDef<IRole>[]>(
-    () => {
-      const hasUpdatePermission = can(Page.Roles, Permission.UPDATE);
-      const hasDeletePermission = can(Page.Roles, Permission.DELETE);
+  const columns = useMemo<ColumnDef<IRole>[]>(() => {
+    const hasUpdatePermission = can(Page.Roles, Permission.UPDATE);
+    const hasDeletePermission = can(Page.Roles, Permission.DELETE);
 
-      return [
-        {
-          accessorKey: "name",
-          header: "Role Name",
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <div className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                <Shield className="size-4" />
-              </div>
-              <span className="font-medium text-foreground">
-                {row.original.name}
-              </span>
+    return [
+      {
+        accessorKey: "name",
+        header: "Role Name",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground">
+              <Shield className="size-4" />
             </div>
-          ),
-        },
-        {
-          accessorKey: "description",
-          header: "Description",
-          enableSorting: false,
-          cell: ({ row }) => (
-            <span className="text-muted-foreground">
-              {row.original.description || "-"}
+            <span className="font-medium text-foreground">
+              {row.original.name}
             </span>
-          ),
-        },
-        {
-          accessorKey: "createdAt",
-          header: "Created At",
-          cell: ({ row }) => (
-            <span className="text-muted-foreground">
-              {formatDate(row.original.createdAt)}
-            </span>
-          ),
-        },
-        {
-          accessorKey: "updatedAt",
-          header: "Updated At",
-          cell: ({ row }) => (
-            <span className="text-muted-foreground">
-              {formatDate(row.original.updatedAt)}
-            </span>
-          ),
-        },
-        ...(hasUpdatePermission || hasDeletePermission
-          ? [
-              {
-                id: "actions",
-                header: () => <div className="text-right">Actions</div>,
-                enableSorting: false,
-                cell: ({ row }: { row: { original: IRole } }) => (
-                  <div className="flex items-center justify-end gap-1">
-                    {hasUpdatePermission && (
-                      <>
-                        <UIButton
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          aria-label="Manage permissions"
-                          onClick={() => handleManagePermissions(row.original.id)}
-                        >
-                          <Key className="size-4 text-muted-foreground hover:text-foreground" />
-                        </UIButton>
-                        <UIButton
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          aria-label="Edit role"
-                          onClick={() => handleOpenEditModal(row.original)}
-                        >
-                          <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
-                        </UIButton>
-                      </>
-                    )}
-                    {hasDeletePermission && (
+          </div>
+        ),
+      },
+      {
+        accessorKey: "description",
+        header: "Description",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.description || "-"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created At",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.original.createdAt)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "updatedAt",
+        header: "Updated At",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.original.updatedAt)}
+          </span>
+        ),
+      },
+      ...(hasUpdatePermission || hasDeletePermission
+        ? [
+            {
+              id: "actions",
+              header: () => <div className="text-right">Actions</div>,
+              enableSorting: false,
+              cell: ({ row }: { row: { original: IRole } }) => (
+                <div className="flex items-center justify-end gap-1">
+                  {hasUpdatePermission && (
+                    <>
                       <UIButton
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Delete role"
-                        onClick={() => handleOpenDeleteConfirm(row.original)}
+                        className="size-8"
+                        aria-label="Manage permissions"
+                        onClick={() => handleManagePermissions(row.original.id)}
                       >
-                        <Trash2 className="size-4" />
+                        <Key className="size-4 text-muted-foreground hover:text-foreground" />
                       </UIButton>
-                    )}
-                  </div>
-                ),
-              },
-            ]
-          : []),
-      ];
-    },
-    [handleManagePermissions, can, handleOpenEditModal, handleOpenDeleteConfirm],
-  );
-
-  if (isAuthLoading) {
-    return <div className="p-8 text-center text-sm text-zinc-500">Loading session...</div>;
-  }
-
-  if (!hasViewPermission) {
-    return <Unauthorized />;
-  }
+                      <UIButton
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        aria-label="Edit role"
+                        onClick={() => handleOpenEditModal(row.original)}
+                      >
+                        <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
+                      </UIButton>
+                    </>
+                  )}
+                  {hasDeletePermission && (
+                    <UIButton
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      aria-label="Delete role"
+                      onClick={() => handleOpenDeleteConfirm(row.original)}
+                    >
+                      <Trash2 className="size-4" />
+                    </UIButton>
+                  )}
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [
+    handleManagePermissions,
+    can,
+    handleOpenEditModal,
+    handleOpenDeleteConfirm,
+  ]);
 
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
             Roles Management
           </h1>
           <p className="text-sm text-muted-foreground">
             Manage system roles, tenant scope, and access control rights.
           </p>
         </div>
-        {can(Page.Roles, Permission.CREATE) && (
-          <UIButton
-            leftIcon={<Plus className="size-4" />}
-            onClick={handleOpenCreateModal}
-          >
-            Add New Role
-          </UIButton>
-        )}
+
+        <div className="flex items-center gap-3">
+          <div className="w-full sm:w-64">
+            <UIInput
+              placeholder="Search by role name..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="h-9 py-1"
+            />
+          </div>
+
+          <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+
+          {can(Page.Roles, Permission.CREATE) && (
+            <UIButton
+              leftIcon={<Plus className="size-4" />}
+              onClick={handleOpenCreateModal}
+              className="h-9"
+            >
+              Add New Role
+            </UIButton>
+          )}
+        </div>
       </div>
 
       {/* Table with Server-Side Pagination */}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useId } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldError } from "@/components/ui/field";

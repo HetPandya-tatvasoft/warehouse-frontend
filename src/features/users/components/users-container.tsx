@@ -13,11 +13,13 @@ import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
-import { Unauthorized } from "@/components/common/Unauthorized";
 
 import { useToggleUserStatus, useUsers } from "../queries/users.queries";
+import { useCurrentUser } from "@/features/auth/queries/auth.queries";
 import type { IUser, UserSortField, SortOrder } from "../types/users.types";
 import { usePermissions, Page, Permission } from "@/permissions";
+import { TITLES } from "@/shared/constants/titles";
+import { MESSAGES } from "@/shared/constants/messages";
 
 function formatDate(dateString: string): string {
   try {
@@ -32,8 +34,8 @@ export function UsersContainer() {
   const router = useRouter();
   const updateQueryParams = useUpdateQueryParams();
 
-  const { can, isLoading: isAuthLoading } = usePermissions();
-  const hasViewPermission = can(Page.Users, Permission.VIEW);
+  const { can } = usePermissions();
+  const { data: currentUser } = useCurrentUser();
 
   const [statusUser, setStatusUser] = useState<IUser | null>(null);
   const [isConfirmStatusOpen, setIsConfirmStatusOpen] = useState(false);
@@ -60,7 +62,7 @@ export function UsersContainer() {
       search: search || undefined,
     },
     {
-      enabled: hasViewPermission && !isAuthLoading,
+      enabled: true,
     },
   );
 
@@ -69,9 +71,9 @@ export function UsersContainer() {
   useEffect(() => {
     if (isError) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Failed to fetch users");
+        toast.error(error.response?.data?.message || MESSAGES.USERS.LOAD_FAILED);
       } else {
-        toast.error("An unexpected error occurred while loading users");
+        toast.error(MESSAGES.USERS.LOAD_UNEXPECTED);
       }
     }
   }, [isError, error]);
@@ -112,7 +114,9 @@ export function UsersContainer() {
       {
         onSuccess: () => {
           toast.success(
-            `User account ${newStatus ? "activated" : "deactivated"} successfully`,
+            newStatus
+              ? MESSAGES.USERS.STATUS_ACTIVATED
+              : MESSAGES.USERS.STATUS_DEACTIVATED,
           );
           setIsConfirmStatusOpen(false);
           setStatusUser(null);
@@ -120,10 +124,10 @@ export function UsersContainer() {
         onError: (error) => {
           if (axios.isAxiosError(error)) {
             toast.error(
-              error.response?.data?.message || "Failed to update user status",
+              error.response?.data?.message || MESSAGES.USERS.STATUS_UPDATE_FAILED,
             );
           } else {
-            toast.error("Something went wrong, please try again");
+            toast.error(MESSAGES.COMMON.SOMETHING_WENT_WRONG);
           }
         },
       },
@@ -135,13 +139,22 @@ export function UsersContainer() {
       {
         accessorKey: "firstName",
         header: "Name",
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-              {row.original.firstName} {row.original.lastName}
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const user = row.original;
+          const isSelf = currentUser && user.id === currentUser.id;
+          return (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {user.firstName} {user.lastName}
+              </span>
+              {isSelf && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                  You
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "email",
@@ -205,7 +218,7 @@ export function UsersContainer() {
           </span>
         ),
       },
-      ...(can(Page.Users, Permission.UPDATE)
+      ...(can(Page.Users, Permission.UPDATE) || currentUser
         ? [
             {
               id: "actions",
@@ -213,37 +226,51 @@ export function UsersContainer() {
               enableSorting: false,
               cell: ({ row }: { row: { original: IUser } }) => {
                 const user = row.original;
+                const isSelf = currentUser && user.id === currentUser.id;
+                const hasUpdatePermission = can(Page.Users, Permission.UPDATE);
+
                 return (
                   <div className="flex items-center gap-1.5">
-                    <UIButton
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditUser(user)}
-                      title="Edit User"
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-                    </UIButton>
+                    {hasUpdatePermission && (
+                      <>
+                        <UIButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditUser(user)}
+                          title={TITLES.USERS.EDIT_USER}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Pencil className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+                        </UIButton>
 
-                    <UIButton
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleOpenStatusConfirm(user)}
-                      title={
-                        user.isActive ? "Deactivate User" : "Activate User"
-                      }
-                      className={`h-8 w-8 p-0 ${
-                        user.isActive
-                          ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                          : "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                      }`}
-                    >
-                      {user.isActive ? (
-                        <Trash2 className="h-4 w-4" />
-                      ) : (
-                        <UserCheck className="h-4 w-4" />
-                      )}
-                    </UIButton>
+                        <UIButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenStatusConfirm(user)}
+                          disabled={isSelf}
+                          title={
+                            isSelf
+                              ? "You cannot deactivate your own account"
+                              : user.isActive
+                                ? "Deactivate User"
+                                : "Activate User"
+                          }
+                          className={`h-8 w-8 p-0 ${
+                            isSelf
+                              ? "opacity-50 cursor-not-allowed text-zinc-400"
+                              : user.isActive
+                                ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                : "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                          }`}
+                        >
+                          {user.isActive ? (
+                            <Trash2 className="h-4 w-4" />
+                          ) : (
+                            <UserCheck className="h-4 w-4" />
+                          )}
+                        </UIButton>
+                      </>
+                    )}
                   </div>
                 );
               },
@@ -251,25 +278,11 @@ export function UsersContainer() {
           ]
         : []),
     ],
-    [can, handleEditUser, handleOpenStatusConfirm],
+    [can, handleEditUser, handleOpenStatusConfirm, currentUser],
   );
-
-  // Its temporary, will remove after I make auth guard which will be there in layout
-  if (isAuthLoading) {
-    return (
-      <div className="p-8 text-center text-sm text-zinc-500">
-        Loading session...
-      </div>
-    );
-  }
-
-  if (!hasViewPermission) {
-    return <Unauthorized />;
-  }
 
   return (
     <div className="space-y-4">
-      {/* Redesigned minimal header with inline controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
         <div>
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -287,7 +300,6 @@ export function UsersContainer() {
             />
           </div>
 
-          {/* Space for future Role/Status filters */}
           <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
 
           {can(Page.Users, Permission.CREATE) && (
@@ -302,7 +314,6 @@ export function UsersContainer() {
         </div>
       </div>
 
-      {/* Users Table */}
       <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-2xs">
         <CommonTable
           data={data?.items ?? []}
@@ -372,7 +383,6 @@ export function UsersContainer() {
         />
       </div>
 
-      {/* Status Toggle Confirmation Modal */}
       <ConfirmDialog
         open={isConfirmStatusOpen}
         onOpenChange={setIsConfirmStatusOpen}

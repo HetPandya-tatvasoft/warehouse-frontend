@@ -4,9 +4,10 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
+import { MESSAGES } from "@/shared/constants/messages";
 
 import { UIButton } from "@/components/common/UIButton";
-import { Unauthorized } from "@/components/common/Unauthorized";
+import { UILoader, UIErrorState } from "@/components/common";
 import {
   useRolePageRights,
   useUpdateRolePageRights,
@@ -16,7 +17,6 @@ import {
   buildUpdateRolePermissionsPayload,
   isPermissionPayloadEqual,
 } from "../utils/permission-utils";
-import { usePermissions, Page, Permission } from "@/permissions";
 
 interface RolePermissionsFormProps {
   roleId: string;
@@ -36,7 +36,8 @@ function toggleIndividualPermission(
     );
     if (!targetPerm) return page;
 
-    const nextValue = forceValue !== undefined ? forceValue : !targetPerm.granted;
+    const nextValue =
+      forceValue !== undefined ? forceValue : !targetPerm.granted;
 
     const updatedPermissions = page.permissions.map((perm) => {
       if (perm.permissionName === permissionName) {
@@ -76,7 +77,10 @@ function toggleIndividualPermission(
 /**
  * Helper to toggle row-level All checkbox.
  */
-function toggleRowAll(matrix: IRolePageRights, pageId: string): IRolePageRights {
+function toggleRowAll(
+  matrix: IRolePageRights,
+  pageId: string,
+): IRolePageRights {
   const page = matrix.pages.find((p) => p.pageId === pageId);
   if (!page) return matrix;
 
@@ -133,12 +137,11 @@ function toggleColumnAll(
 export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
   const router = useRouter();
 
-  const { can, isLoading: isAuthLoading } = usePermissions();
-  const hasUpdatePermission = can(Page.Roles, Permission.UPDATE);
-
-  const { data: response, isLoading, isError } = useRolePageRights(roleId, {
-    enabled: hasUpdatePermission && !isAuthLoading,
-  });
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useRolePageRights(roleId);
 
   const [originalPermissionMatrix, setOriginalPermissionMatrix] =
     useState<IRolePageRights | null>(null);
@@ -178,7 +181,11 @@ export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
   const handlePermissionToggle = (pageId: string, permissionName: string) => {
     if (!editedPermissionMatrix) return;
     setEditedPermissionMatrix(
-      toggleIndividualPermission(editedPermissionMatrix, pageId, permissionName),
+      toggleIndividualPermission(
+        editedPermissionMatrix,
+        pageId,
+        permissionName,
+      ),
     );
   };
 
@@ -215,68 +222,39 @@ export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
       { roleId, payload },
       {
         onSuccess: () => {
-          toast.success("Role permissions updated successfully");
-          setOriginalPermissionMatrix(
-            structuredClone(editedPermissionMatrix),
-          );
+          toast.success(MESSAGES.ROLES.PERMISSIONS_UPDATE_SUCCESS);
+          setOriginalPermissionMatrix(structuredClone(editedPermissionMatrix));
           router.push("/roles");
         },
         onError: (error) => {
           if (axios.isAxiosError(error)) {
             toast.error(
               error.response?.data?.message ||
-                "Failed to update role permissions",
+                MESSAGES.ROLES.PERMISSIONS_UPDATE_FAILED,
             );
           } else {
-            toast.error("Something went wrong, please try again");
+            toast.error(MESSAGES.COMMON.SOMETHING_WENT_WRONG);
           }
         },
       },
     );
   };
 
-  if (isAuthLoading) {
-    return (
-      <div className="p-8 text-center text-sm text-zinc-500 animate-pulse">
-        Loading session...
-      </div>
-    );
-  }
 
-  if (!hasUpdatePermission) {
-    return <Unauthorized />;
-  }
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="animate-pulse space-y-4 w-full max-w-2xl">
-          <div className="h-20 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
-          <div className="h-64 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
-        </div>
-      </div>
-    );
+    return <UILoader className="min-h-[400px]" />;
   }
 
   if (isError || !editedPermissionMatrix) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] border border-red-200 dark:border-red-900/50 rounded-xl bg-red-50/50 dark:bg-red-950/20 p-6 text-center">
-        <div>
-          <h2 className="text-sm font-semibold text-rose-600 dark:text-rose-400">
-            Error Loading Permissions
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            We couldn&apos;t retrieve the permission matrix for this role.
-          </p>
-          <UIButton
-            className="mt-4"
-            variant="outline"
-            onClick={() => router.push("/roles")}
-          >
-            Back to Roles
-          </UIButton>
-        </div>
-      </div>
+      <UIErrorState
+        title="Error Loading Permissions"
+        description="We couldn't retrieve the permission matrix for this role."
+        actionText="Back to Roles"
+        onAction={() => router.push("/roles")}
+        className="min-h-[400px]"
+      />
     );
   }
 
@@ -306,7 +284,10 @@ export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
                 </th>
                 {permissionNames.map((name) => {
                   const supportedPages = editedPermissionMatrix.pages.filter(
-                    (p) => p.permissions.some((perm) => perm.permissionName === name),
+                    (p) =>
+                      p.permissions.some(
+                        (perm) => perm.permissionName === name,
+                      ),
                   );
                   const isColChecked =
                     supportedPages.length > 0 &&
@@ -394,7 +375,9 @@ export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
                               className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-zinc-300 dark:border-zinc-700"
                             />
                           ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
+                            <span className="text-xs text-muted-foreground">
+                              -
+                            </span>
                           )}
                         </td>
                       );

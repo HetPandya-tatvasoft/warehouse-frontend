@@ -19,6 +19,8 @@ import {
   type CreateUserFormValues,
   type UpdateUserFormValues,
 } from "../schemas/users.schema";
+import { TITLES } from "@/shared/constants/titles";
+import { MESSAGES } from "@/shared/constants/messages";
 
 interface UserFormProps {
   mode: "create" | "update";
@@ -113,19 +115,21 @@ export function UserForm({ mode, user }: UserFormProps) {
       onSuccess: () => {
         toast.success(
           isEditing
-            ? "User updated successfully"
-            : "User created successfully! Login credentials have been sent to their email.",
+            ? MESSAGES.USERS.UPDATE_SUCCESS
+            : MESSAGES.USERS.CREATE_SUCCESS,
         );
         router.push("/users");
       },
       onError: (error) => {
-        const action = isEditing ? "update" : "create";
         if (axios.isAxiosError(error)) {
           toast.error(
-            error.response?.data?.message || `Failed to ${action} user`,
+            error.response?.data?.message ||
+              (isEditing
+                ? MESSAGES.USERS.UPDATE_FAILED
+                : MESSAGES.USERS.CREATE_FAILED),
           );
         } else {
-          toast.error("Something went wrong, please try again");
+          toast.error(MESSAGES.COMMON.SOMETHING_WENT_WRONG);
         }
       },
     });
@@ -137,7 +141,7 @@ export function UserForm({ mode, user }: UserFormProps) {
     <div className="max-w-2xl mx-auto bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xs overflow-hidden">
       <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/20">
         <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-          {isEditing ? "Edit User Account" : "Create New User"}
+          {isEditing ? TITLES.USERS.EDIT_USER_ACCOUNT : TITLES.USERS.CREATE_NEW_USER}
         </h2>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
           {isEditing
@@ -156,7 +160,6 @@ export function UserForm({ mode, user }: UserFormProps) {
               label="Email Address"
               type="email"
               required
-              placeholder="e.g. user@organization.com"
               error={form.formState.errors.email?.message}
               disabled={isPending}
               {...form.register("email")}
@@ -166,7 +169,6 @@ export function UserForm({ mode, user }: UserFormProps) {
               label="Initial Password"
               type="password"
               required
-              placeholder="At least 8 characters"
               error={form.formState.errors.password?.message}
               disabled={isPending}
               {...form.register("password")}
@@ -178,7 +180,6 @@ export function UserForm({ mode, user }: UserFormProps) {
           <UIInput
             label="First Name"
             required
-            placeholder="John"
             error={form.formState.errors.firstName?.message}
             disabled={isPending}
             {...form.register("firstName")}
@@ -187,7 +188,6 @@ export function UserForm({ mode, user }: UserFormProps) {
           <UIInput
             label="Last Name"
             required
-            placeholder="Doe"
             error={form.formState.errors.lastName?.message}
             disabled={isPending}
             {...form.register("lastName")}

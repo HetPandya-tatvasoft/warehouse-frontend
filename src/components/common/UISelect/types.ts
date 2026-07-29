@@ -18,7 +18,12 @@ export type SelectOptions<TOption> = TOption[] | SelectGroup<TOption>[];
 export function isGrouped<TValue>(
   options: SelectOptions<TValue>
 ): options is SelectGroup<TValue>[] {
-  return options.length > 0 && "groupLabel" in (options[0] as object);
+  return (
+    options.length > 0 &&
+    typeof options[0] === "object" &&
+    options[0] !== null &&
+    "groupLabel" in options[0]
+  );
 }
 
 export type SelectFieldAccessors<TOption, TValue> = {

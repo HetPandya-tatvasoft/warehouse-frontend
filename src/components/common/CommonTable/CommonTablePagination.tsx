@@ -29,8 +29,6 @@ export function CommonTablePagination<TData>({
   const startIndex = totalItems === 0 ? 0 : pageIndex * pageSize + 1;
   const endIndex = Math.min(startIndex + currentRowsCount - 1, totalItems);
 
-
-  // Simple and minimal page range logic (shows a window of up to 5 pages around the current page)
   const startPage = Math.max(0, Math.min(pageCount - 5, pageIndex - 2));
   const endPage = Math.min(pageCount, startPage + 5);
   const visiblePages = Array.from(

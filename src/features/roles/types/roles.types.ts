@@ -16,6 +16,7 @@ export interface IGetRolesParams {
   pageSize?: number;
   sortBy?: RoleSortField;
   sortOrder?: SortOrder;
+  search?: string;
 }
 
 export interface ICreateRolePayload {

@@ -4,12 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  LayoutDashboard,
-  ShieldCheck,
   Warehouse,
   LogOut,
   User,
-  Users,
   Menu,
   X,
   ChevronUp,
@@ -23,9 +20,9 @@ import {
 } from "@/features/auth/queries/auth.queries";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/lib/utils";
-import { usePermissions, Page, Permission } from "@/permissions";
+import type { Page, Permission } from "@/permissions";
 
-interface NavItem {
+export interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -33,36 +30,17 @@ interface NavItem {
   permission?: Permission;
 }
 
-const navItems: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: PAGE_ROUTES.DASHBOARD,
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Users",
-    href: PAGE_ROUTES.USERS,
-    icon: Users,
-    page: Page.Users,
-    permission: Permission.VIEW,
-  },
-  {
-    label: "Roles",
-    href: PAGE_ROUTES.ROLES,
-    icon: ShieldCheck,
-    page: Page.Roles,
-    permission: Permission.VIEW,
-  },
-];
+interface AppSidebarProps {
+  items: NavItem[];
+}
 
-export function AppSidebar() {
+export function AppSidebar({ items }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: user } = useCurrentUser();
-  const { can } = usePermissions();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const handleLogout = () => {
@@ -119,7 +97,7 @@ export function AppSidebar() {
       {/* Sidebar (Desktop & Mobile Drawer) */}
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:z-auto",
+          "fixed top-0 bottom-0 left-0 z-50 w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:z-auto h-full",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -143,8 +121,7 @@ export function AppSidebar() {
           <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
             Navigation
           </div>
-          {navItems
-            .filter((item) => !item.page || !item.permission || can(item.page, item.permission))
+          {items
             .map((item) => {
               const Icon = item.icon;
               const isActive =

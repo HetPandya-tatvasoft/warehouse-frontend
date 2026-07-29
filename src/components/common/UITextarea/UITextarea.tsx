@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { useId } from "react";
 import { Textarea } from "@/components/ui/textarea";

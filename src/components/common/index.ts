@@ -11,4 +11,5 @@ export * from "@/components/common/UIFileUpload";
 export * from "@/components/common/UIDatePicker";
 export * from "@/components/common/UIModal/UIModal";
 export * from "@/components/common/Unauthorized";
-
+export * from "@/components/common/UILoader/UILoader";
+export * from "@/components/common/UIErrorState/UIErrorState";

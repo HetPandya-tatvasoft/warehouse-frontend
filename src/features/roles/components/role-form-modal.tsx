@@ -17,6 +17,8 @@ import {
 } from "../schemas/roles.schema";
 import { useCreateRole, useUpdateRole } from "../queries/roles.queries";
 import type { IRole } from "../types/roles.types";
+import { TITLES } from "@/shared/constants/titles";
+import { MESSAGES } from "@/shared/constants/messages";
 
 interface RoleFormModalProps {
   open: boolean;
@@ -80,18 +82,24 @@ export function RoleFormModal({
 
     saveRole(payload, {
       onSuccess: () => {
-        toast.success(`Role ${role?.id ? "updated" : "created"} successfully`);
+        toast.success(
+          role?.id
+            ? MESSAGES.ROLES.UPDATE_SUCCESS
+            : MESSAGES.ROLES.CREATE_SUCCESS,
+        );
         onOpenChange(false);
         reset();
       },
       onError: (error) => {
-        const action = role?.id ? "update" : "create";
         if (axios.isAxiosError(error)) {
           toast.error(
-            error.response?.data?.message || `Failed to ${action} role`,
+            error.response?.data?.message ||
+              (role?.id
+                ? MESSAGES.ROLES.UPDATE_FAILED
+                : MESSAGES.ROLES.CREATE_FAILED),
           );
         } else {
-          toast.error("Something went wrong, please try again");
+          toast.error(MESSAGES.COMMON.SOMETHING_WENT_WRONG);
         }
       },
     });
@@ -101,7 +109,7 @@ export function RoleFormModal({
     <UIModal
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? "Edit Role" : "Create New Role"}
+      title={isEditing ? TITLES.ROLES.EDIT_ROLE : TITLES.ROLES.CREATE_NEW_ROLE}
       description={
         isEditing
           ? "Update the details for this role."
@@ -134,7 +142,6 @@ export function RoleFormModal({
         <UIInput
           label="Role Name"
           required
-          placeholder="e.g. Warehouse Manager"
           error={errors.name?.message}
           disabled={isPending}
           {...register("name")}
@@ -142,7 +149,6 @@ export function RoleFormModal({
 
         <UITextarea
           label="Description"
-          placeholder="Brief description of the role responsibilities..."
           error={errors.description?.message}
           disabled={isPending}
           rows={3}

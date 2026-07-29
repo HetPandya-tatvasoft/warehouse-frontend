@@ -41,7 +41,7 @@ import {
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = React.useState(() =>
-    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false,
   );
 
   React.useEffect(() => {
@@ -56,7 +56,7 @@ function useMediaQuery(query: string): boolean {
 
 // Main component
 export function UISelect<TOption, TValue = TOption>(
-  props: SelectProps<TOption, TValue>
+  props: SelectProps<TOption, TValue>,
 ) {
   const {
     options,
@@ -146,7 +146,6 @@ export function UISelect<TOption, TValue = TOption>(
   const [search, setSearch] = React.useState("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  // ── Derived values ──────────────────────
   const isMulti = mode === "multi";
 
   const currentValue = React.useMemo(() => {
@@ -154,12 +153,10 @@ export function UISelect<TOption, TValue = TOption>(
     return props.value ?? [];
   }, [mode, props.value]);
 
-  // ── Filtered options (for searchable) ──
   const filteredOptions = React.useMemo(() => {
     return filterOptions(options, search, getOptionLabel);
   }, [options, search, getOptionLabel]);
 
-  // ── Handlers ────────────────────────────
   const handleSelect = React.useCallback(
     (option: TOption) => {
       if (mode === "single") {
@@ -176,7 +173,7 @@ export function UISelect<TOption, TValue = TOption>(
         props.onValueChange?.(newValues);
       }
     },
-    [props, getOptionValue, by, mode]
+    [props, getOptionValue, by, mode],
   );
 
   const handleSelectAll = React.useCallback(() => {
@@ -200,7 +197,7 @@ export function UISelect<TOption, TValue = TOption>(
         props.onValueChange?.([]);
       }
     },
-    [props, mode]
+    [props, mode],
   );
 
   const handleRemoveChip = React.useCallback(
@@ -208,11 +205,11 @@ export function UISelect<TOption, TValue = TOption>(
       e.stopPropagation();
       if (mode !== "multi") return;
       const newValues = ((props.value ?? []) as TValue[]).filter(
-        (v) => !areValuesEqual(v, val, by)
+        (v) => !areValuesEqual(v, val, by),
       );
       props.onValueChange?.(newValues);
     },
-    [props, by, mode]
+    [props, by, mode],
   );
 
   // ── Checks ──────────────────────────────
@@ -224,17 +221,17 @@ export function UISelect<TOption, TValue = TOption>(
         return areValuesEqual(optionValue, props.value, by);
       }
       return ((props.value ?? []) as TValue[]).some((v) =>
-        areValuesEqual(v, optionValue, by)
+        areValuesEqual(v, optionValue, by),
       );
     },
-    [mode, props.value, getOptionValue, by]
+    [mode, props.value, getOptionValue, by],
   );
 
   const allSelected = React.useMemo(() => {
     if (!isMulti) return false;
     return areAllSelected({
       options: filteredOptions,
-      currentValues: (mode === "multi" ? props.value ?? [] : []) as TValue[],
+      currentValues: (mode === "multi" ? (props.value ?? []) : []) as TValue[],
       getOptionValue,
       getOptionDisabled,
       by,
@@ -253,7 +250,7 @@ export function UISelect<TOption, TValue = TOption>(
     if (!isMulti) return false;
     return areSomeSelected({
       options: filteredOptions,
-      currentValues: (mode === "multi" ? props.value ?? [] : []) as TValue[],
+      currentValues: (mode === "multi" ? (props.value ?? []) : []) as TValue[],
       getOptionValue,
       getOptionDisabled,
       by,
@@ -274,7 +271,6 @@ export function UISelect<TOption, TValue = TOption>(
       currentValue !== null &&
       currentValue !== "";
 
-  // ── Shared UI pieces ────────────────────
   const TriggerUI = (
     <div
       role="combobox"
@@ -290,7 +286,7 @@ export function UISelect<TOption, TValue = TOption>(
         open && "border-ring ring-2 ring-ring/20",
         error && "border-destructive ring-2 ring-destructive/20",
         disabled && "cursor-not-allowed opacity-50",
-        className
+        className,
       )}
     >
       {/* Left — selected value display */}
@@ -324,7 +320,7 @@ export function UISelect<TOption, TValue = TOption>(
               <MultiChips
                 values={currentValue as TValue[]}
                 options={options}
-                maxCount={mode === "multi" ? props.maxCount ?? 3 : 3}
+                maxCount={mode === "multi" ? (props.maxCount ?? 3) : 3}
                 getOptionLabel={getOptionLabel}
                 getOptionValue={getOptionValue}
                 getOptionKey={getOptionKey}
@@ -352,7 +348,7 @@ export function UISelect<TOption, TValue = TOption>(
         <ChevronsUpDown
           className={cn(
             "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
-            open && "rotate-180"
+            open && "rotate-180",
           )}
         />
       </div>
@@ -393,8 +389,8 @@ export function UISelect<TOption, TValue = TOption>(
                         allSelected
                           ? true
                           : someSelected
-                          ? "indeterminate"
-                          : false
+                            ? "indeterminate"
+                            : false
                       }
                       className="pointer-events-none"
                     />
@@ -434,7 +430,7 @@ export function UISelect<TOption, TValue = TOption>(
       )}
 
       {isDesktop ? (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={(val) => !disabled && setOpen(val)}>
           <PopoverTrigger asChild>{TriggerUI}</PopoverTrigger>
           <PopoverContent
             className="w-(--radix-popover-trigger-width) p-0"
@@ -445,7 +441,7 @@ export function UISelect<TOption, TValue = TOption>(
           </PopoverContent>
         </Popover>
       ) : (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={(val) => !disabled && setOpen(val)}>
           <DrawerTrigger asChild>{TriggerUI}</DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
@@ -623,7 +619,7 @@ function OptionItem<TOption>({
       onSelect={() => !disabled && onSelect(option)}
       className={cn(
         "flex items-center gap-2",
-        disabled && "cursor-not-allowed opacity-50"
+        disabled && "cursor-not-allowed opacity-50",
       )}
     >
       {/* Checkbox — multi mode only */}
@@ -642,7 +638,7 @@ function OptionItem<TOption>({
         <Check
           className={cn(
             "ml-auto size-4 shrink-0",
-            selected ? "opacity-100" : "opacity-0"
+            selected ? "opacity-100" : "opacity-0",
           )}
         />
       )}

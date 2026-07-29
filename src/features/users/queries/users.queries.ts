@@ -19,16 +19,16 @@ export const usersQueries = {
     }),
 };
 
-function useUserMutation<TVariables>(
-  mutationFn: (variables: TVariables) => Promise<unknown>,
+function useUserMutation<TData, TVariables>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<TData, Error, TVariables>({
     mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: queryKeys.roles.all(),
+        queryKey: queryKeys.users.all(),
       }),
   });
 }

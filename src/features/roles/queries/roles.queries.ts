@@ -2,7 +2,7 @@ import { queryKeys } from "@/lib/query/query-keys";
 import { apiQueryOptions } from "@/lib/query/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rolesApi } from "../api/roles.api";
-import type { IGetRolesParams, IUpdateRolePageRightsPayload } from "../types/roles.types";
+import type { IGetRolesParams } from "../types/roles.types";
 
 export const rolesQueries = {
   list: (params?: IGetRolesParams, cookieHeader?: string) =>
@@ -26,12 +26,12 @@ export const rolesQueries = {
     }),
 };
 
-function useRoleMutation<TVariables>(
-  mutationFn: (variables: TVariables) => Promise<unknown>,
+function useRoleMutation<TData, TVariables>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<TData, Error, TVariables>({
     mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
@@ -71,13 +71,7 @@ export function useUpdateRolePageRights() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      roleId,
-      payload,
-    }: {
-      roleId: string;
-      payload: IUpdateRolePageRightsPayload;
-    }) => rolesApi.updateRolePageRights({ roleId, payload }),
+    mutationFn: rolesApi.updateRolePageRights,
     onSuccess: (_, { roleId }) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.roles.pageRights(roleId),

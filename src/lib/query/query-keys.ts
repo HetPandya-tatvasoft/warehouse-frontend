@@ -15,4 +15,10 @@ export const queryKeys = {
     list: <T extends object>(params?: T) => ["users", "list", params] as const,
     detail: (id: string) => ["users", "detail", id] as const,
   },
+
+  tenants: {
+    all: () => ["tenants"] as const,
+    list: <T extends object>(params?: T) => ["tenants", "list", params] as const,
+    detail: (id: string) => ["tenants", "detail", id] as const,
+  },
 };

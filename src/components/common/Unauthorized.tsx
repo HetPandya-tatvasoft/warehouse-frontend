@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ShieldAlert, ArrowLeft, LayoutDashboard } from "lucide-react";
 import { UIButton } from "./UIButton/UIButton";

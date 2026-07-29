@@ -1,3 +1,5 @@
+"use client";
+
 import { FieldLabel } from "@/components/ui/field";
 
 export type UIFieldLabelProps = {

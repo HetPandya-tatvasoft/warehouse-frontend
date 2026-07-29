@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import type { UIModalProps } from "../UIModal/UIModal";
 import { UIModal } from "../UIModal/UIModal";
