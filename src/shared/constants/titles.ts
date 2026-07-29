@@ -2,9 +2,14 @@ export const TITLES = {
   AUTH: {
     SIGN_IN: "Sign In",
   },
+  DASHBOARD: {
+    PLATFORM: "Platform Admin Dashboard",
+    TENANT: "Dashboard",
+  },
   TENANTS: {
     ONBOARD_NEW_TENANT: "Onboard New Tenant",
     ONBOARD_SUCCESSFUL: "Tenant Onboarding Successful",
+    PLATFORM_TENANT_MANAGEMENT: "Platform Tenant Management",
   },
   USERS: {
     CREATE_NEW_USER: "Create New User",

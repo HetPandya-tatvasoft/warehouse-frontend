@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/queries/auth.queries";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { UILoader } from "@/components/common";
+import { TITLES } from "@/shared/constants/titles";
 
 export default function DashboardPage() {
   const { data, isLoading } = useCurrentUser();
@@ -25,7 +26,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Dashboard
+          {TITLES.DASHBOARD.TENANT}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Welcome back! Here is an overview of your session.

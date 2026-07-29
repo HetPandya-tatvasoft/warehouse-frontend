@@ -9,6 +9,8 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
+import { TITLES } from "@/shared/constants/titles";
+import { MESSAGES } from "@/shared/constants/messages";
 import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { UIInput } from "@/components/common/UIInput/UIInput";
@@ -70,10 +72,10 @@ export function TenantList() {
     if (isError) {
       if (axios.isAxiosError(error)) {
         toast.error(
-          error.response?.data?.message || "Failed to fetch tenants list",
+          error.response?.data?.message || MESSAGES.TENANTS.LOAD_FAILED,
         );
       } else {
-        toast.error("An unexpected error occurred while loading tenants");
+        toast.error(MESSAGES.TENANTS.LOAD_UNEXPECTED);
       }
     }
   }, [isError, error]);
@@ -193,7 +195,7 @@ export function TenantList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
         <div>
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            Platform Tenant Management
+            {TITLES.TENANTS.PLATFORM_TENANT_MANAGEMENT}
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
             Display, search, and onboard system tenants.

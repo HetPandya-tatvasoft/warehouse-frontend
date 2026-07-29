@@ -10,6 +10,8 @@ export const MESSAGES = {
     ONBOARD_FAILED: "Failed to onboard tenant",
     PASSWORD_COPIED: "Password copied to clipboard!",
     PASSWORD_COPY_FAILED: "Failed to copy password",
+    LOAD_FAILED: "Failed to fetch tenants list",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading tenants",
   },
   USERS: {
     LOAD_FAILED: "Failed to fetch users",

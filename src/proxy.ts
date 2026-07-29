@@ -1,6 +1,7 @@
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 import { PAGE_ROUTES, PUBLIC_ROUTES } from "@/shared/constants/routes";
+import { COOKIE_NAMES } from "@/shared/constants/cookies";
 
 export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -9,8 +10,8 @@ export function proxy(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  const refreshToken = request.cookies.get("refresh_token")?.value;
-  const accessToken = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get(COOKIE_NAMES.REFRESH_TOKEN)?.value;
+  const accessToken = request.cookies.get(COOKIE_NAMES.ACCESS_TOKEN)?.value;
 
   if (isPublicRoute) {
     if (pathname === PAGE_ROUTES.LOGIN && (refreshToken || accessToken)) {
