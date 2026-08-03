@@ -20,4 +20,9 @@ export const TITLES = {
     CREATE_NEW_ROLE: "Create New Role",
     EDIT_ROLE: "Edit Role",
   },
+  BRANCHES: {
+    CREATE_NEW_BRANCH: "Create New Branch",
+    EDIT_BRANCH: "Edit Branch",
+    BRANCH_MANAGEMENT: "Branch Management",
+  },
 } as const;

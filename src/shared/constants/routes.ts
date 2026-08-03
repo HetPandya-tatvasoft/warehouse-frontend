@@ -3,6 +3,7 @@ export const PAGE_ROUTES = {
   DASHBOARD: "/dashboard",
   ROLES: "/roles",
   USERS: "/users",
+  BRANCHES: "/branches",
   UNAUTHORIZED: "/unauthorized",
   PLATFORM_DASHBOARD: "/platform/dashboard",
   PLATFORM_TENANTS: "/platform/tenants",

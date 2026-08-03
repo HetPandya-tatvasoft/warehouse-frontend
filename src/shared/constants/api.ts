@@ -5,5 +5,6 @@ export const API_ROUTES = {
   REFRESH_TOKEN: "/auth/refresh-token",
   ROLES: "/roles",
   USERS: "/users",
+  BRANCHES: "/branches",
   TENANTS: "/platform/tenants",
 } as const;

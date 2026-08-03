@@ -21,30 +21,7 @@ import { TenantSuccessDialog } from "./tenant-success-dialog";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { TITLES } from "@/shared/constants/titles";
 import { MESSAGES } from "@/shared/constants/messages";
-
-const COUNTRY_STATES_MAP: Record<string, string[]> = {
-  India: ["Gujarat", "Maharashtra", "Karnataka"],
-  "United States": ["California", "New York", "Texas"],
-  Canada: ["Ontario", "British Columbia", "Quebec"],
-  "United Kingdom": ["England", "Scotland"],
-  Australia: ["New South Wales", "Victoria"],
-};
-
-const STATE_CITIES_MAP: Record<string, string[]> = {
-  Gujarat: ["Ahmedabad", "Gandhinagar"],
-  Maharashtra: ["Mumbai", "Pune"],
-  Karnataka: ["Bengaluru"],
-  California: ["Los Angeles", "San Francisco"],
-  "New York": ["New York City"],
-  Texas: ["Houston", "Austin"],
-  Ontario: ["Toronto", "Ottawa"],
-  "British Columbia": ["Vancouver"],
-  Quebec: ["Montreal"],
-  England: ["London", "Manchester"],
-  Scotland: ["Edinburgh"],
-  "New South Wales": ["Sydney"],
-  Victoria: ["Melbourne"],
-};
+import { COUNTRY_STATES_MAP, STATE_CITIES_MAP } from "@/shared/constants/locations";
 
 export function TenantCreateForm() {
   const router = useRouter();

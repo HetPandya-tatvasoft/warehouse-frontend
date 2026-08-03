@@ -36,4 +36,14 @@ export const MESSAGES = {
     CREATE_FAILED: "Failed to create role",
     UPDATE_FAILED: "Failed to update role",
   },
+  BRANCHES: {
+    LOAD_FAILED: "Failed to fetch branches",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading branches",
+    CREATE_SUCCESS: "Branch created successfully",
+    UPDATE_SUCCESS: "Branch updated successfully",
+    DELETE_SUCCESS: "Branch deleted successfully",
+    CREATE_FAILED: "Failed to create branch",
+    UPDATE_FAILED: "Failed to update branch",
+    DELETE_FAILED: "Failed to delete branch",
+  },
 } as const;

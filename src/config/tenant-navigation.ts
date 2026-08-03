@@ -1,5 +1,5 @@
 import { PAGE_ROUTES } from "@/shared/constants/routes";
-import { LayoutDashboard, Users, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, ShieldCheck, GitBranch } from "lucide-react";
 import { Page, Permission } from "@/permissions";
 import type { NavItem } from "@/components/layout/app-sidebar";
 
@@ -21,6 +21,13 @@ export const tenantNavigationItems: NavItem[] = [
     href: PAGE_ROUTES.ROLES,
     icon: ShieldCheck,
     page: Page.Roles,
+    permission: Permission.VIEW,
+  },
+  {
+    label: "Branches",
+    href: PAGE_ROUTES.BRANCHES,
+    icon: GitBranch,
+    page: Page.Branches,
     permission: Permission.VIEW,
   },
 ];

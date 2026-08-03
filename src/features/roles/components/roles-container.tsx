@@ -85,7 +85,9 @@ export function RolesContainer() {
   useEffect(() => {
     if (isError) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || MESSAGES.ROLES.LOAD_FAILED);
+        toast.error(
+          error.response?.data?.message || MESSAGES.ROLES.LOAD_FAILED,
+        );
       } else {
         toast.error(MESSAGES.ROLES.LOAD_UNEXPECTED);
       }
@@ -118,7 +120,9 @@ export function RolesContainer() {
       },
       onError: (err) => {
         if (axios.isAxiosError(err)) {
-          toast.error(err.response?.data?.message || MESSAGES.ROLES.DELETE_FAILED);
+          toast.error(
+            err.response?.data?.message || MESSAGES.ROLES.DELETE_FAILED,
+          );
         } else {
           toast.error(MESSAGES.ROLES.DELETE_FAILED_UNEXPECTED);
         }
@@ -187,7 +191,7 @@ export function RolesContainer() {
               header: () => <div className="text-right">Actions</div>,
               enableSorting: false,
               cell: ({ row }: { row: { original: IRole } }) => (
-                <div className="flex items-center justify-end gap-1">
+                <div className="flex items-center gap-1">
                   {hasUpdatePermission && (
                     <>
                       <UIButton

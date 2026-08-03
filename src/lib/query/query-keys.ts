@@ -21,4 +21,9 @@ export const queryKeys = {
     list: <T extends object>(params?: T) => ["tenants", "list", params] as const,
     detail: (id: string) => ["tenants", "detail", id] as const,
   },
+  branches: {
+    all: () => ["branches"] as const,
+    list: <T extends object>(params?: T) => ["branches", "list", params] as const,
+    detail: (id: string) => ["branches", "detail", id] as const,
+  },
 };
