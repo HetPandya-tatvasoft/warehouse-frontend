@@ -34,6 +34,8 @@ export interface ITenantOnboardingDto {
   state: string;
   country: string;
   postalCode: string;
+  branchName: string;
+  timezone?: string;
   primaryAdministrator: ITenantPrimaryAdmin;
 }
 

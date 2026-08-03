@@ -8,6 +8,7 @@ export const authApi = {
   logout,
   refreshToken,
   me,
+  switchBranch,
 };
 
 async function login(data: ILoginDto): Promise<IApiSuccessResponse<IAuthUser>> {
@@ -35,6 +36,14 @@ async function refreshToken(): Promise<IApiSuccessResponse<IAuthUser>> {
 async function me(): Promise<IApiSuccessResponse<ICurrentUser>> {
   const response = await apiClient.get<IApiSuccessResponse<ICurrentUser>>(
     API_ROUTES.ME
+  );
+  return response.data;
+}
+
+async function switchBranch(branchId: string): Promise<IApiSuccessResponse<ICurrentUser>> {
+  const response = await apiClient.post<IApiSuccessResponse<ICurrentUser>>(
+    API_ROUTES.BRANCH_SWITCH,
+    { branchId }
   );
   return response.data;
 }

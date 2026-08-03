@@ -7,6 +7,12 @@ export interface IUserRole {
   description?: string;
 }
 
+export interface IUserBranch {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+}
+
 export interface IUser {
   id: string;
   email: string;
@@ -17,6 +23,7 @@ export interface IUser {
   createdAt: string;
   updatedAt: string;
   roles: IUserRole[];
+  branches: IUserBranch[];
 }
 
 export interface IGetUsersParams {
@@ -33,6 +40,8 @@ export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
   roleIds: string[];
+  branchIds: string[];
+  primaryBranchId: string;
   isActive?: boolean;
 }
 
@@ -40,6 +49,8 @@ export interface IUpdateUserPayload {
   firstName?: string;
   lastName?: string;
   roleIds?: string[];
+  branchIds?: string[];
+  primaryBranchId?: string;
   isActive?: boolean;
 }
 

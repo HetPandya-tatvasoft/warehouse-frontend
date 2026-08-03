@@ -5,6 +5,10 @@ export const MESSAGES = {
   },
   AUTH: {
     SIGNIN_FAILED: "Failed to sign in",
+    LOGIN_SUCCESS: "Login successful!",
+    LOGOUT_SUCCESS: "Logout successful",
+    LOGOUT_FAILED: "Logout failed",
+    LOGOUT_UNEXPECTED: "Something went wrong, try again later!",
   },
   TENANTS: {
     ONBOARD_FAILED: "Failed to onboard tenant",
@@ -45,5 +49,7 @@ export const MESSAGES = {
     CREATE_FAILED: "Failed to create branch",
     UPDATE_FAILED: "Failed to update branch",
     DELETE_FAILED: "Failed to delete branch",
+    SWITCH_SUCCESS: "Branch switched successfully",
+    SWITCH_FAILED: "Failed to switch branch",
   },
 } as const;

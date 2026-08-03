@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COUNTRY_STATES_MAP } from "@/shared/constants/locations";
 
 export const tenantOnboardingSchema = z.object({
   companyName: z
@@ -13,6 +14,10 @@ export const tenantOnboardingSchema = z.object({
       /^[a-z0-9-]+$/,
       "Slug must contain only lowercase letters, numbers, and hyphens",
     ),
+  branchName: z
+    .string()
+    .min(1, "Branch Name is required")
+    .max(150, "Branch Name cannot exceed 150 characters"),
   companyEmail: z
     .string()
     .min(1, "Company Email is required")
@@ -21,7 +26,7 @@ export const tenantOnboardingSchema = z.object({
   addressLine1: z.string().min(1, "Address Line 1 is required"),
   addressLine2: z.string().optional().or(z.literal("")),
   country: z.enum(
-    ["India", "United States", "Canada", "United Kingdom", "Australia"],
+    Object.keys(COUNTRY_STATES_MAP) as [string, ...string[]],
     {
       message: "Please select an allowed country",
     },

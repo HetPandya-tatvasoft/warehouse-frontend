@@ -62,18 +62,33 @@ export function UIModal({
           if (!closeOnEscape) e.preventDefault();
         }}
         aria-label={!title ? ariaLabel : undefined}
-        className={cn(SIZE_CLASSES[size], "max-h-[90vh] overflow-y-auto", className)}
+        className={cn(
+          SIZE_CLASSES[size],
+          "max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden",
+          className
+        )}
       >
         {(title || description) && (
-          <DialogHeader>
+          <DialogHeader className="pt-6 px-6 pb-0">
             {title && <DialogTitle>{title}</DialogTitle>}
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
           </DialogHeader>
         )}
-        {children}
-        {footer && <DialogFooter>{footer}</DialogFooter>}
+        <div
+          className={cn(
+            "flex-1 overflow-y-auto px-6 py-4",
+            !(title || description) && "pt-6"
+          )}
+        >
+          {children}
+        </div>
+        {footer && (
+          <DialogFooter className="m-0 rounded-t-none px-6 py-4">
+            {footer}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

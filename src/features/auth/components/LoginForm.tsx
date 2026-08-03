@@ -43,7 +43,7 @@ export function LoginForm() {
   const onSubmit = (data: LoginFormValues) => {
     login(data, {
       onSuccess: (response) => {
-        toast.success(response.message || "Login successful!");
+        toast.success(response.message || MESSAGES.AUTH.LOGIN_SUCCESS);
         reset();
         const redirectUrl =
           searchParams.get("redirect") || PAGE_ROUTES.DASHBOARD;

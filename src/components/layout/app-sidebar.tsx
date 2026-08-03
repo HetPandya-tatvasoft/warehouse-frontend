@@ -19,8 +19,10 @@ import {
   useLogout,
 } from "@/features/auth/queries/auth.queries";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
+import { MESSAGES } from "@/shared/constants/messages";
 import { cn } from "@/lib/utils";
 import type { Page, Permission } from "@/permissions";
+import { BranchSwitcher } from "./branch-switcher";
 
 export interface NavItem {
   label: string;
@@ -46,14 +48,14 @@ export function AppSidebar({ items }: AppSidebarProps) {
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
-        toast.success("Logout successful");
+        toast.success(MESSAGES.AUTH.LOGOUT_SUCCESS);
         router.replace(PAGE_ROUTES.LOGIN);
       },
       onError: (error) => {
         if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message || "Logout failed");
+          toast.error(error.response?.data?.message || MESSAGES.AUTH.LOGOUT_FAILED);
         } else {
-          toast.error("Something went wrong, try again later!");
+          toast.error(MESSAGES.AUTH.LOGOUT_UNEXPECTED);
         }
       },
     });
@@ -115,6 +117,9 @@ export function AppSidebar({ items }: AppSidebarProps) {
             </span>
           </div>
         </div>
+
+        {/* Branch Switcher Workspace Selector */}
+        <BranchSwitcher />
 
         {/* Navigation Links */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">

@@ -4,10 +4,23 @@ export const COUNTRY_STATES_MAP: Record<string, string[]> = {
   Canada: ["Ontario", "British Columbia", "Quebec"],
   "United Kingdom": ["England", "Scotland"],
   Australia: ["New South Wales", "Victoria"],
+  Japan: ["Kanagawa"],
 };
 
 export const STATE_CITIES_MAP: Record<string, string[]> = {
-  Gujarat: ["Ahmedabad", "Gandhinagar"],
+  Gujarat: [
+    "Ahmedabad",
+    "Gandhinagar",
+    "Surat",
+    "Vadodara",
+    "Rajkot",
+    "Bhavnagar",
+    "Jamnagar",
+    "Anand",
+    "Junagadh",
+    "Morbi",
+    "Valodara",
+  ],
   Maharashtra: ["Mumbai", "Pune"],
   Karnataka: ["Bengaluru"],
   California: ["Los Angeles", "San Francisco"],
@@ -20,4 +33,5 @@ export const STATE_CITIES_MAP: Record<string, string[]> = {
   Scotland: ["Edinburgh"],
   "New South Wales": ["Sydney"],
   Victoria: ["Melbourne"],
+  Kanagawa: ["Kawasaki-shi"],
 };

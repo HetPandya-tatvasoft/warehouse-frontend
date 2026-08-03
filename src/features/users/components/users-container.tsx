@@ -191,6 +191,46 @@ export function UsersContainer() {
         },
       },
       {
+        accessorKey: "branches",
+        header: "Branches",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const branches = row.original.branches || [];
+          if (branches.length === 0) {
+            return (
+              <span className="text-xs text-zinc-400 italic">No branches</span>
+            );
+          }
+
+          const sortedBranches = [...branches].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+          const visibleBranches = sortedBranches.slice(0, 2);
+          const remainingCount = branches.length - 2;
+
+          return (
+            <div className="flex flex-col gap-1 items-start">
+              {visibleBranches.map((b) => (
+                <span
+                  key={b.id}
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    b.isPrimary
+                      ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
+                      : "bg-zinc-50 text-zinc-600 border-zinc-200 dark:bg-zinc-900/50 dark:text-zinc-400 dark:border-zinc-800"
+                  }`}
+                >
+                  {b.isPrimary && <span className="text-amber-500 mr-1">★</span>}
+                  {b.name}
+                </span>
+              ))}
+              {remainingCount > 0 && (
+                <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 pl-2">
+                  +{remainingCount} more
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "isActive",
         header: "Status",
         enableSorting: false,

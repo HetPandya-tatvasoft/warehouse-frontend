@@ -45,6 +45,7 @@ export function TenantCreateForm() {
       defaultValues: {
         companyName: "",
         slug: "",
+        branchName: "Head Office",
         companyEmail: "",
         companyPhone: "",
         addressLine1: "",
@@ -91,6 +92,7 @@ export function TenantCreateForm() {
     const payload: ITenantOnboardingDto = {
       ...values,
       addressLine2: values.addressLine2 || undefined,
+      timezone: "UTC",
       primaryAdministrator: {
         ...values.primaryAdministrator,
       },
@@ -183,6 +185,16 @@ export function TenantCreateForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UIInput
+                label="Initial Branch Name"
+                required
+                error={errors.branchName?.message}
+                disabled={isPending}
+                {...register("branchName")}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <UIInput
                 label="Company Email"
                 type="email"
                 required
@@ -226,13 +238,7 @@ export function TenantCreateForm() {
                     mode="single"
                     label="Country"
                     required
-                    options={[
-                      "India",
-                      "United States",
-                      "Canada",
-                      "United Kingdom",
-                      "Australia",
-                    ]}
+                    options={Object.keys(COUNTRY_STATES_MAP)}
                     value={field.value}
                     onValueChange={(val) => {
                       field.onChange(val);

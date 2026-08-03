@@ -225,7 +225,7 @@ export function BranchFormModal({
             />
 
             <UIInput
-              label="Address Line 2 (Optional)"
+              label="Address Line 2"
               error={errors.addressLine2?.message}
               disabled={isPending}
               {...register("addressLine2")}

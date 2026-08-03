@@ -39,3 +39,17 @@ export function useLogout() {
     mutationFn: authApi.logout,
   });
 }
+
+export function useSwitchBranch() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.switchBranch,
+    onSuccess: async (response) => {
+      queryClient.setQueryData(queryKeys.auth.currentUser(), response);
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== "current-user",
+      });
+    },
+  });
+}

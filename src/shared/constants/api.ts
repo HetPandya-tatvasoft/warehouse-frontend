@@ -7,4 +7,5 @@ export const API_ROUTES = {
   USERS: "/users",
   BRANCHES: "/branches",
   TENANTS: "/platform/tenants",
+  BRANCH_SWITCH: "/auth/switch-branch",
 } as const;

@@ -10,6 +10,13 @@ export const tenantNavigationItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
+    label: "Branches",
+    href: PAGE_ROUTES.BRANCHES,
+    icon: GitBranch,
+    page: Page.Branches,
+    permission: Permission.VIEW,
+  },
+  {
     label: "Users",
     href: PAGE_ROUTES.USERS,
     icon: Users,
@@ -21,13 +28,6 @@ export const tenantNavigationItems: NavItem[] = [
     href: PAGE_ROUTES.ROLES,
     icon: ShieldCheck,
     page: Page.Roles,
-    permission: Permission.VIEW,
-  },
-  {
-    label: "Branches",
-    href: PAGE_ROUTES.BRANCHES,
-    icon: GitBranch,
-    page: Page.Branches,
     permission: Permission.VIEW,
   },
 ];

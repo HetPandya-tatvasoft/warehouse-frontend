@@ -5,6 +5,12 @@ export interface ILoginDto {
   password: string;
 }
 
+export interface ICurrentUserBranch {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+}
+
 export interface ICurrentUser {
   id: string;
   email: string;
@@ -13,6 +19,8 @@ export interface ICurrentUser {
   tenantId: string | null;
   roles?: string[];
   permissions: Partial<Record<Page, Partial<Record<Permission, boolean>>>>;
+  branches?: ICurrentUserBranch[];
+  activeBranch?: ICurrentUserBranch | null;
 }
 
 export interface IAuthUser {

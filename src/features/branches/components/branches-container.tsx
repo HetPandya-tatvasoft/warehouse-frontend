@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { GitBranch, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -121,7 +121,7 @@ export function BranchesContainer() {
 
     deleteBranch(deletingBranch.id, {
       onSuccess: () => {
-        toast.success(`Branch '${deletingBranch.name}' deleted successfully`);
+        toast.success(MESSAGES.BRANCHES.DELETE_SUCCESS);
         setIsConfirmDeleteOpen(false);
         setDeletingBranch(null);
       },

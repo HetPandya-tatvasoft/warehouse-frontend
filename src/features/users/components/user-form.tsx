@@ -11,6 +11,8 @@ import { UIInput } from "@/components/common/UIInput/UIInput";
 import { UIButton } from "@/components/common/UIButton";
 
 import { useRoles } from "@/features/roles/queries/roles.queries";
+import { useBranches } from "@/features/branches/queries/branches.queries";
+import type { IBranch } from "@/features/branches/types/branches.types";
 import { useCreateUser, useUpdateUser } from "../queries/users.queries";
 import type { IUser, IUserRole } from "../types/users.types";
 import {
@@ -36,7 +38,13 @@ export function UserForm({ mode, user }: UserFormProps) {
     pageSize: 100,
   });
 
+  const { data: branchesData, isLoading: isLoadingBranches } = useBranches({
+    page: 1,
+    pageSize: 100,
+  });
+
   const availableRoles = (rolesData?.items || []) as IUserRole[];
+  const availableBranches = branchesData?.items || [];
 
   const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema) as unknown as Resolver<CreateUserFormValues>,
@@ -46,6 +54,8 @@ export function UserForm({ mode, user }: UserFormProps) {
       firstName: "",
       lastName: "",
       roleIds: [],
+      branchIds: [],
+      primaryBranchId: "",
       isActive: true,
     },
   });
@@ -57,12 +67,15 @@ export function UserForm({ mode, user }: UserFormProps) {
 
   useEffect(() => {
     if (isEditing && user) {
+      const primaryBranch = user.branches?.find((b) => b.isPrimary);
       form.reset({
         email: user.email,
         password: "", // Not modified/shown during editing
         firstName: user.firstName,
         lastName: user.lastName,
         roleIds: user.roles?.map((r) => r.id) || [],
+        branchIds: user.branches?.map((b) => b.id) || [],
+        primaryBranchId: primaryBranch?.id || "",
         isActive: user.isActive,
       });
     }
@@ -72,6 +85,16 @@ export function UserForm({ mode, user }: UserFormProps) {
     control: form.control,
     name: "roleIds",
   }) || [];
+
+  const selectedBranchIds = useWatch({
+    control: form.control,
+    name: "branchIds",
+  }) || [];
+
+  const primaryBranchId = useWatch({
+    control: form.control,
+    name: "primaryBranchId",
+  }) || "";
 
   const isActiveValue = useWatch({
     control: form.control,
@@ -87,6 +110,25 @@ export function UserForm({ mode, user }: UserFormProps) {
     form.setValue("roleIds", newRoleIds, { shouldValidate: true });
   };
 
+  const handleBranchToggle = (branchId: string) => {
+    const currentBranchIds = selectedBranchIds;
+    let newBranchIds: string[];
+
+    if (currentBranchIds.includes(branchId)) {
+      newBranchIds = currentBranchIds.filter((id) => id !== branchId);
+      if (primaryBranchId === branchId) {
+        form.setValue("primaryBranchId", newBranchIds[0] || "", { shouldValidate: true });
+      }
+    } else {
+      newBranchIds = [...currentBranchIds, branchId];
+      if (!primaryBranchId) {
+        form.setValue("primaryBranchId", branchId, { shouldValidate: true });
+      }
+    }
+
+    form.setValue("branchIds", newBranchIds, { shouldValidate: true });
+  };
+
   const saveUser = (
     payload: CreateUserFormValues,
     options: {
@@ -99,6 +141,8 @@ export function UserForm({ mode, user }: UserFormProps) {
         firstName: payload.firstName,
         lastName: payload.lastName,
         roleIds: payload.roleIds,
+        branchIds: payload.branchIds,
+        primaryBranchId: payload.primaryBranchId,
         isActive: payload.isActive,
       };
       updateUser(
@@ -136,6 +180,7 @@ export function UserForm({ mode, user }: UserFormProps) {
   };
 
   const roleError = form.formState.errors.roleIds?.message;
+  const branchError = form.formState.errors.branchIds?.message || form.formState.errors.primaryBranchId?.message;
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xs overflow-hidden">
@@ -145,7 +190,7 @@ export function UserForm({ mode, user }: UserFormProps) {
         </h2>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
           {isEditing
-            ? "Update user details and assigned roles."
+            ? "Update user details, assigned roles, and branch memberships."
             : "Add a new user to your tenant organization. Credentials will be emailed to them."}
         </p>
       </div>
@@ -242,6 +287,76 @@ export function UserForm({ mode, user }: UserFormProps) {
 
           {roleError && (
             <p className="text-xs font-medium text-rose-500">{roleError}</p>
+          )}
+        </div>
+
+        {/* Branches Selection */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Assign Branches <span className="text-rose-500">*</span>
+          </label>
+
+          {isLoadingBranches ? (
+            <p className="text-xs text-zinc-500">Loading available branches...</p>
+          ) : availableBranches.length === 0 ? (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              No branches found. Please create branches first.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto p-2 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50/50 dark:bg-zinc-900/50">
+              {availableBranches.map((branch: IBranch) => {
+                const isSelected = selectedBranchIds.includes(branch.id);
+                const isPrimary = primaryBranchId === branch.id;
+                return (
+                  <div
+                    key={branch.id}
+                    className={`flex items-center justify-between p-2.5 rounded-md border text-xs transition-colors ${
+                      isSelected
+                        ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 font-medium"
+                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <label className="flex items-center gap-3.5 cursor-pointer flex-1 py-1">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleBranchToggle(branch.id)}
+                        disabled={isPending}
+                        className="rounded text-indigo-600 focus:ring-indigo-500 h-4.5 w-4.5"
+                      />
+                      <div>
+                        <p className="font-semibold">{branch.name}</p>
+                        {branch.city && (
+                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                            {branch.city}, {branch.state || branch.country}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+
+                    {isSelected && (
+                      <button
+                        type="button"
+                        onClick={() => form.setValue("primaryBranchId", branch.id, { shouldValidate: true })}
+                        disabled={isPending}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold transition-all ${
+                          isPrimary
+                            ? "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800 shadow-2xs"
+                            : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span className={isPrimary ? "text-amber-500" : "text-zinc-400"}>★</span>
+                        {isPrimary ? "Primary Branch" : "Set as Primary"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {branchError && (
+            <p className="text-xs font-medium text-rose-500">{branchError}</p>
           )}
         </div>
 
