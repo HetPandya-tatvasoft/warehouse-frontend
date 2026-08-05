@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
+import { Eye, PauseCircle, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
@@ -15,6 +15,7 @@ import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { UISelect } from "@/components/common/UISelect/UISelect";
+import { PageHeader, PageContainer } from "@/components/common";
 import { useTenants } from "../queries/tenants.queries";
 import type {
   ITenant,
@@ -158,27 +159,39 @@ export function TenantList() {
           </span>
         ),
       },
-      // {
-      //   id: "actions",
-      //   header: "Actions",
-      //   enableSorting: false,
-      //   cell: () => (
-      //     <div className="flex items-center gap-1.5">
-      //       <UIButton variant="ghost" size="sm" className="h-8 w-8 p-0" title="View">
-      //         <Eye className="h-4 w-4 text-zinc-500" />
-      //       </UIButton>
-      //       <UIButton variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit">
-      //         <Pencil className="h-4 w-4 text-zinc-500" />
-      //       </UIButton>
-      //       <UIButton variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-rose-50 dark:hover:bg-rose-950/20" title="Suspend">
-      //         <PauseCircle className="h-4 w-4 text-rose-500" />
-      //       </UIButton>
-      //       <UIButton variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-emerald-50 dark:hover:bg-emerald-950/20" title="Activate">
-      //         <PlayCircle className="h-4 w-4 text-emerald-500" />
-      //       </UIButton>
-      //     </div>
-      //   ),
-      // },
+      {
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        cell: () => (
+          <div className="flex items-center gap-1.5">
+            <UIButton
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="View"
+            >
+              <Eye className="h-4 w-4 text-zinc-500" />
+            </UIButton>
+            <UIButton
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="Edit"
+            >
+              <Pencil className="h-4 w-4 text-zinc-500" />
+            </UIButton>
+            <UIButton
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+              title="Suspend"
+            >
+              <PauseCircle className="h-4 w-4 text-rose-500" />
+            </UIButton>
+          </div>
+        ),
+      },
     ],
     [],
   );
@@ -191,17 +204,11 @@ export function TenantList() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            {TITLES.TENANTS.PLATFORM_TENANT_MANAGEMENT}
-          </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Display, search, and onboard system tenants.
-          </p>
-        </div>
-
+    <PageContainer className="space-y-4">
+      <PageHeader
+        title={TITLES.TENANTS.PLATFORM_TENANT_MANAGEMENT}
+        description="Display, search, and onboard system tenants."
+      >
         <UIButton
           onClick={() => router.push(PAGE_ROUTES.PLATFORM_TENANTS_CREATE)}
           className="flex items-center gap-2 h-9 text-sm self-start sm:self-auto"
@@ -209,7 +216,7 @@ export function TenantList() {
           <Plus className="w-4 h-4" />
           <span>Create Tenant</span>
         </UIButton>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <div className="w-full sm:w-72 relative">
@@ -303,6 +310,6 @@ export function TenantList() {
           }
         />
       </div>
-    </div>
+    </PageContainer>
   );
 }

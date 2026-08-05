@@ -11,6 +11,7 @@ import { Building2, UserCircle, Loader2 } from "lucide-react";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { UISelect } from "@/components/common/UISelect/UISelect";
 import { UIButton } from "@/components/common/UIButton";
+import { PageHeader, PageContainer } from "@/components/common";
 import {
   tenantOnboardingSchema,
   type TenantOnboardingFormValues,
@@ -21,7 +22,14 @@ import { TenantSuccessDialog } from "./tenant-success-dialog";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { TITLES } from "@/shared/constants/titles";
 import { MESSAGES } from "@/shared/constants/messages";
-import { COUNTRY_STATES_MAP, STATE_CITIES_MAP } from "@/shared/constants/locations";
+import {
+  useCountries,
+  useStates,
+  useCities,
+  type ICountry,
+  type IState,
+  type ICity,
+} from "@/shared/hooks/use-regions";
 
 export function TenantCreateForm() {
   const router = useRouter();
@@ -39,7 +47,7 @@ export function TenantCreateForm() {
     temporaryPassword: "",
   });
 
-  const { register, handleSubmit, control, setValue, formState } =
+  const { register, handleSubmit, control, setValue, clearErrors, formState } =
     useForm<TenantOnboardingFormValues>({
       resolver: zodResolver(tenantOnboardingSchema),
       defaultValues: {
@@ -50,9 +58,9 @@ export function TenantCreateForm() {
         companyPhone: "",
         addressLine1: "",
         addressLine2: "",
-        country: undefined,
-        state: "",
-        city: "",
+        countryId: undefined,
+        stateId: undefined,
+        cityId: undefined,
         postalCode: "",
         primaryAdministrator: {
           firstName: "",
@@ -65,34 +73,42 @@ export function TenantCreateForm() {
   const { errors, touchedFields } = formState;
 
   // Watch country and state to filter choices dynamically
-  const selectedCountry = useWatch({ control, name: "country" });
-  const selectedState = useWatch({ control, name: "state" });
+  const selectedCountryId = useWatch({ control, name: "countryId" });
+  const selectedStateId = useWatch({ control, name: "stateId" });
   const companyNameValue = useWatch({ control, name: "companyName" });
+
+  // Load locations dynamically from API
+  const { data: countriesData, isLoading: isCountriesLoading } = useCountries();
+  const { data: statesData, isLoading: isStatesLoading } =
+    useStates(selectedCountryId);
+  const { data: citiesData, isLoading: isCitiesLoading } =
+    useCities(selectedStateId);
 
   // Auto-generate slug from Company Name
   useEffect(() => {
-    if (companyNameValue && !touchedFields.slug) {
-      const generatedSlug = companyNameValue
+    if (!touchedFields.slug) {
+      const generatedSlug = (companyNameValue || "")
         .toLowerCase()
         .trim()
         .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric with hyphen
         .replace(/^-+|-+$/g, ""); // remove leading/trailing hyphens
-      setValue("slug", generatedSlug, { shouldValidate: true });
+      setValue("slug", generatedSlug, { shouldValidate: generatedSlug !== "" });
+      if (generatedSlug === "") {
+        clearErrors("slug");
+      }
     }
-  }, [companyNameValue, setValue, touchedFields.slug]);
+  }, [companyNameValue, setValue, touchedFields.slug, clearErrors]);
 
-  const stateOptions = selectedCountry
-    ? COUNTRY_STATES_MAP[selectedCountry] || []
-    : [];
-  const cityOptions = selectedState
-    ? STATE_CITIES_MAP[selectedState] || []
-    : [];
+  const stateOptions = selectedCountryId ? statesData || [] : [];
+  const cityOptions = selectedStateId ? citiesData || [] : [];
 
   const onSubmit = (values: TenantOnboardingFormValues) => {
     const payload: ITenantOnboardingDto = {
       ...values,
+      countryId: values.countryId!,
+      stateId: values.stateId!,
+      cityId: values.cityId!,
       addressLine2: values.addressLine2 || undefined,
-      timezone: "UTC",
       primaryAdministrator: {
         ...values.primaryAdministrator,
       },
@@ -133,27 +149,16 @@ export function TenantCreateForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+    <PageContainer className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title={
+          <span className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
             {TITLES.TENANTS.ONBOARD_NEW_TENANT}
-          </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Setup a new tenant organization and its primary administrator
-            account.
-          </p>
-        </div>
-        <UIButton
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(PAGE_ROUTES.PLATFORM_TENANTS)}
-          disabled={isPending}
-        >
-          Cancel
-        </UIButton>
-      </div>
+          </span>
+        }
+        description="Setup a new tenant organization and its primary administrator account."
+      ></PageHeader>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xs overflow-hidden">
@@ -232,58 +237,70 @@ export function TenantCreateForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <Controller
                 control={control}
-                name="country"
+                name="countryId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<ICountry, number>
                     mode="single"
                     label="Country"
                     required
-                    options={Object.keys(COUNTRY_STATES_MAP)}
+                    options={countriesData ?? []}
+                    getOptionLabel={(c) => c.name}
+                    getOptionValue={(c) => c.id}
                     value={field.value}
                     onValueChange={(val) => {
                       field.onChange(val);
-                      setValue("state", "");
-                      setValue("city", "");
+                      setValue("stateId", undefined);
+                      setValue("cityId", undefined);
                     }}
-                    error={errors.country?.message}
+                    error={errors.countryId?.message}
                     disabled={isPending}
+                    isLoading={isCountriesLoading}
+                    searchable
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="state"
+                name="stateId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<IState, number>
                     mode="single"
                     label="State"
                     required
                     options={stateOptions}
+                    getOptionLabel={(s) => s.name}
+                    getOptionValue={(s) => s.id}
                     value={field.value}
                     onValueChange={(val) => {
                       field.onChange(val);
-                      setValue("city", "");
+                      setValue("cityId", undefined);
                     }}
-                    error={errors.state?.message}
-                    disabled={isPending || !selectedCountry}
+                    error={errors.stateId?.message}
+                    disabled={isPending || !selectedCountryId}
+                    isLoading={isStatesLoading}
+                    searchable
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="city"
+                name="cityId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<ICity, number>
                     mode="single"
                     label="City"
                     required
                     options={cityOptions}
+                    getOptionLabel={(c) => c.name}
+                    getOptionValue={(c) => c.id}
                     value={field.value}
                     onValueChange={field.onChange}
-                    error={errors.city?.message}
-                    disabled={isPending || !selectedState}
+                    error={errors.cityId?.message}
+                    disabled={isPending || !selectedStateId}
+                    isLoading={isCitiesLoading}
+                    searchable
                   />
                 )}
               />
@@ -370,6 +387,6 @@ export function TenantCreateForm() {
           onClose={handleCloseSuccessDialog}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }

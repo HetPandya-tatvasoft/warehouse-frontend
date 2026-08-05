@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { COUNTRY_STATES_MAP } from "@/shared/constants/locations";
 
 export const tenantOnboardingSchema = z.object({
   companyName: z
@@ -25,14 +24,24 @@ export const tenantOnboardingSchema = z.object({
   companyPhone: z.string().min(1, "Company Phone is required"),
   addressLine1: z.string().min(1, "Address Line 1 is required"),
   addressLine2: z.string().optional().or(z.literal("")),
-  country: z.enum(
-    Object.keys(COUNTRY_STATES_MAP) as [string, ...string[]],
-    {
-      message: "Please select an allowed country",
-    },
-  ),
-  state: z.string().min(1, "State is required"),
-  city: z.string().min(1, "City is required"),
+  countryId: z
+    .number()
+    .optional()
+    .refine((val) => val !== undefined && val !== null, {
+      message: "Country is required",
+    }),
+  stateId: z
+    .number()
+    .optional()
+    .refine((val) => val !== undefined && val !== null, {
+      message: "State is required",
+    }),
+  cityId: z
+    .number()
+    .optional()
+    .refine((val) => val !== undefined && val !== null, {
+      message: "City is required",
+    }),
   postalCode: z.string().min(1, "Postal Code is required"),
   primaryAdministrator: z.object({
     firstName: z.string().min(1, "First Name is required"),
@@ -44,4 +53,21 @@ export const tenantOnboardingSchema = z.object({
   }),
 });
 
-export type TenantOnboardingFormValues = z.infer<typeof tenantOnboardingSchema>;
+export interface TenantOnboardingFormValues {
+  companyName: string;
+  slug: string;
+  branchName: string;
+  companyEmail: string;
+  companyPhone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  countryId?: number;
+  stateId?: number;
+  cityId?: number;
+  postalCode: string;
+  primaryAdministrator: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}

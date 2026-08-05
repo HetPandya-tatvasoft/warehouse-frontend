@@ -14,12 +14,29 @@ export interface IBranch {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  addressLine1?: string;
-  addressLine2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postalCode?: string;
+  address?: {
+    id: string;
+    addressLine1: string;
+    addressLine2?: string | null;
+    cityId: number;
+    stateId: number;
+    countryId: number;
+    postalCode: string;
+    city?: {
+      id: number;
+      name: string;
+      stateId: number;
+    } | null;
+    state?: {
+      id: number;
+      name: string;
+      countryId: number;
+    } | null;
+    country?: {
+      id: number;
+      name: string;
+    } | null;
+  } | null;
 }
 
 export interface IGetBranchesParams {
@@ -36,9 +53,9 @@ export interface ICreateBranchPayload {
   status?: BranchStatus;
   addressLine1?: string;
   addressLine2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
+  cityId?: number;
+  stateId?: number;
+  countryId?: number;
   postalCode?: string;
 }
 
@@ -47,8 +64,8 @@ export interface IUpdateBranchPayload {
   status?: BranchStatus;
   addressLine1?: string;
   addressLine2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
+  cityId?: number;
+  stateId?: number;
+  countryId?: number;
   postalCode?: string;
 }

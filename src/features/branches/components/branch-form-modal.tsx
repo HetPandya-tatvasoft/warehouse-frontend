@@ -16,10 +16,22 @@ import {
   type BranchUpsertFormData,
 } from "../schemas/branches.schema";
 import { useCreateBranch, useUpdateBranch } from "../queries/branches.queries";
-import { BranchStatus, type IBranch } from "../types/branches.types";
+import {
+  BranchStatus,
+  type IBranch,
+  type ICreateBranchPayload,
+  type IUpdateBranchPayload,
+} from "../types/branches.types";
 import { TITLES } from "@/shared/constants/titles";
 import { MESSAGES } from "@/shared/constants/messages";
-import { COUNTRY_STATES_MAP, STATE_CITIES_MAP } from "@/shared/constants/locations";
+import {
+  useCountries,
+  useStates,
+  useCities,
+  type ICountry,
+  type IState,
+  type ICity,
+} from "@/shared/hooks/use-regions";
 
 interface BranchFormModalProps {
   open: boolean;
@@ -58,23 +70,27 @@ export function BranchFormModal({
       status: BranchStatus.ACTIVE,
       addressLine1: "",
       addressLine2: "",
-      city: "",
-      state: "",
-      country: "",
+      cityId: undefined,
+      stateId: undefined,
+      countryId: undefined,
       postalCode: "",
     },
   });
 
-  const selectedCountry = useWatch({ control, name: "country" });
-  const selectedState = useWatch({ control, name: "state" });
+  const selectedCountryId = useWatch({ control, name: "countryId" });
+  const selectedStateId = useWatch({ control, name: "stateId" });
 
-  const countryOptions = Object.keys(COUNTRY_STATES_MAP);
-  const stateOptions = selectedCountry
-    ? COUNTRY_STATES_MAP[selectedCountry] || []
-    : [];
-  const cityOptions = selectedState
-    ? STATE_CITIES_MAP[selectedState] || []
-    : [];
+  // Load locations dynamically from API
+  const { data: countriesData, isLoading: isCountriesLoading } = useCountries();
+  const { data: statesData, isLoading: isStatesLoading } = useStates(
+    selectedCountryId || undefined,
+  );
+  const { data: citiesData, isLoading: isCitiesLoading } = useCities(
+    selectedStateId || undefined,
+  );
+
+  const stateOptions = selectedCountryId ? statesData || [] : [];
+  const cityOptions = selectedStateId ? citiesData || [] : [];
 
   const { mutate: createBranch, isPending: isCreating } = useCreateBranch();
   const { mutate: updateBranch, isPending: isUpdating } = useUpdateBranch();
@@ -86,18 +102,18 @@ export function BranchFormModal({
       reset({
         name: branch?.name || "",
         status: branch?.status || BranchStatus.ACTIVE,
-        addressLine1: branch?.addressLine1 || "",
-        addressLine2: branch?.addressLine2 || "",
-        city: branch?.city || "",
-        state: branch?.state || "",
-        country: branch?.country || "",
-        postalCode: branch?.postalCode || "",
+        addressLine1: branch?.address?.addressLine1 || "",
+        addressLine2: branch?.address?.addressLine2 || "",
+        cityId: branch?.address?.cityId ?? undefined,
+        stateId: branch?.address?.stateId ?? undefined,
+        countryId: branch?.address?.countryId ?? undefined,
+        postalCode: branch?.address?.postalCode || "",
       });
     }
   }, [open, branch, reset]);
 
   const saveBranch = (
-    payload: BranchUpsertFormData,
+    payload: ICreateBranchPayload & IUpdateBranchPayload,
     options: {
       onSuccess: () => void;
       onError: (error: unknown) => void;
@@ -116,9 +132,9 @@ export function BranchFormModal({
       status: formData.status,
       addressLine1: formData.addressLine1?.trim() || undefined,
       addressLine2: formData.addressLine2?.trim() || undefined,
-      city: formData.city?.trim() || undefined,
-      state: formData.state?.trim() || undefined,
-      country: formData.country?.trim() || undefined,
+      cityId: formData.cityId || undefined,
+      stateId: formData.stateId || undefined,
+      countryId: formData.countryId || undefined,
       postalCode: formData.postalCode?.trim() || undefined,
     };
 
@@ -234,55 +250,67 @@ export function BranchFormModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Controller
                 control={control}
-                name="country"
+                name="countryId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<ICountry, number>
                     mode="single"
                     label="Country"
-                    options={countryOptions}
-                    value={field.value}
+                    options={countriesData ?? []}
+                    getOptionLabel={(c) => c.name}
+                    getOptionValue={(c) => c.id}
+                    value={field.value ?? undefined}
                     onValueChange={(val) => {
                       field.onChange(val);
-                      setValue("state", "");
-                      setValue("city", "");
+                      setValue("stateId", undefined);
+                      setValue("cityId", undefined);
                     }}
-                    error={errors.country?.message}
+                    error={errors.countryId?.message}
                     disabled={isPending}
+                    isLoading={isCountriesLoading}
+                    searchable
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="state"
+                name="stateId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<IState, number>
                     mode="single"
                     label="State"
                     options={stateOptions}
-                    value={field.value}
+                    getOptionLabel={(s) => s.name}
+                    getOptionValue={(s) => s.id}
+                    value={field.value ?? undefined}
                     onValueChange={(val) => {
                       field.onChange(val);
-                      setValue("city", "");
+                      setValue("cityId", undefined);
                     }}
-                    error={errors.state?.message}
-                    disabled={isPending || !selectedCountry}
+                    error={errors.stateId?.message}
+                    disabled={isPending || !selectedCountryId}
+                    isLoading={isStatesLoading}
+                    searchable
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="city"
+                name="cityId"
                 render={({ field }) => (
-                  <UISelect<string>
+                  <UISelect<ICity, number>
                     mode="single"
                     label="City"
                     options={cityOptions}
-                    value={field.value}
+                    getOptionLabel={(c) => c.name}
+                    getOptionValue={(c) => c.id}
+                    value={field.value ?? undefined}
                     onValueChange={field.onChange}
-                    error={errors.city?.message}
-                    disabled={isPending || !selectedState}
+                    error={errors.cityId?.message}
+                    disabled={isPending || !selectedStateId}
+                    isLoading={isCitiesLoading}
+                    searchable
                   />
                 )}
               />

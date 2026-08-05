@@ -23,6 +23,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { Command as CommandPrimitive } from "cmdk";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldError } from "@/components/ui/field";
@@ -279,10 +280,18 @@ export function UISelect<TOption, TValue = TOption>(
       aria-haspopup="listbox"
       aria-invalid={!!error}
       aria-disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          setOpen(true);
+        }
+      }}
       onClick={() => !disabled && setOpen((prev) => !prev)}
       className={cn(
-        "relative flex min-h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm transition-colors",
-        "hover:border-ring/50",
+        "relative flex min-h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm transition-colors outline-none",
+        "hover:border-ring/50 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20",
         open && "border-ring ring-2 ring-ring/20",
         error && "border-destructive ring-2 ring-destructive/20",
         disabled && "cursor-not-allowed opacity-50",
@@ -358,11 +367,17 @@ export function UISelect<TOption, TValue = TOption>(
   const ContentUI = (
     <Command shouldFilter={false}>
       {/* Search */}
-      {searchable && (
+      {searchable ? (
         <CommandInput
           placeholder="Search..."
           value={search}
           onValueChange={setSearch}
+        />
+      ) : (
+        <CommandPrimitive.Input
+          value={search}
+          onValueChange={setSearch}
+          className="sr-only"
         />
       )}
 

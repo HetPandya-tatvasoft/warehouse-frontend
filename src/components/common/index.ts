@@ -13,3 +13,5 @@ export * from "@/components/common/UIModal/UIModal";
 export * from "@/components/common/Unauthorized";
 export * from "@/components/common/UILoader/UILoader";
 export * from "@/components/common/UIErrorState/UIErrorState";
+export * from "@/components/common/PageHeader/PageHeader";
+export * from "@/components/common/PageContainer/PageContainer";

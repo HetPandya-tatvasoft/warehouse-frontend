@@ -13,6 +13,7 @@ import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
+import { PageHeader, PageContainer } from "@/components/common";
 
 import { useToggleUserStatus, useUsers } from "../queries/users.queries";
 import { useCurrentUser } from "@/features/auth/queries/auth.queries";
@@ -322,37 +323,29 @@ export function UsersContainer() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            User Management
-          </h1>
+    <PageContainer className="space-y-4">
+      <PageHeader title="User Management">
+        <div className="w-full sm:w-64">
+          <UIInput
+            placeholder="Search by name or email..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-9 py-1"
+          />
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-full sm:w-64">
-            <UIInput
-              placeholder="Search by name or email..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 py-1"
-            />
-          </div>
+        <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
 
-          <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
-
-          {can(Page.Users, Permission.CREATE) && (
-            <UIButton
-              onClick={handleCreateUser}
-              className="flex items-center gap-2 h-9 text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add User</span>
-            </UIButton>
-          )}
-        </div>
-      </div>
+        {can(Page.Users, Permission.CREATE) && (
+          <UIButton
+            onClick={handleCreateUser}
+            className="flex items-center gap-2 h-9 text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add User</span>
+          </UIButton>
+        )}
+      </PageHeader>
 
       <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-2xs">
         <CommonTable
@@ -441,6 +434,6 @@ export function UsersContainer() {
         onConfirm={handleConfirmStatusToggle}
         isLoading={isToggling}
       />
-    </div>
+    </PageContainer>
   );
 }

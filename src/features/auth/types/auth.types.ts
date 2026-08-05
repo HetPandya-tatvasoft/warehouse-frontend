@@ -31,6 +31,3 @@ export interface IAuthUser {
   roles: string[];
   tenantId: string | null;
 }
-
-
-

@@ -13,11 +13,23 @@ export interface ITenant {
   companyPhone: string;
   addressLine1: string;
   addressLine2?: string;
-  city: string;
-  state: string;
-  country: string;
+  country?: {
+    id: number;
+    name: string;
+    code?: string;
+  } | null;
+  state?: {
+    id: number;
+    name: string;
+    code?: string;
+    countryId: number;
+  } | null;
+  city?: {
+    id: number;
+    name: string;
+    stateId: number;
+  } | null;
   postalCode: string;
-  timezone: string;
   createdAt: string;
   updatedAt: string;
   primaryAdmin?: ITenantPrimaryAdmin;
@@ -30,12 +42,11 @@ export interface ITenantOnboardingDto {
   companyPhone: string;
   addressLine1: string;
   addressLine2?: string;
-  city: string;
-  state: string;
-  country: string;
+  cityId: number;
+  stateId: number;
+  countryId: number;
   postalCode: string;
   branchName: string;
-  timezone?: string;
   primaryAdministrator: ITenantPrimaryAdmin;
 }
 

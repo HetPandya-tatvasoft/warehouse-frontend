@@ -7,6 +7,8 @@ import {
 import { authApi } from "../api/auth.api";
 import { apiQueryOptions } from "@/lib/query/utils";
 
+import { regionsQueries } from "@/shared/hooks/use-regions";
+
 export const authQueries = {
   currentUser: () =>
     apiQueryOptions({
@@ -30,6 +32,7 @@ export function useLogin() {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.auth.currentUser(),
       });
+      queryClient.prefetchQuery(regionsQueries.countries());
     },
   });
 }

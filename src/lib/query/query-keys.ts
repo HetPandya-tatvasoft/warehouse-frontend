@@ -26,4 +26,11 @@ export const queryKeys = {
     list: <T extends object>(params?: T) => ["branches", "list", params] as const,
     detail: (id: string) => ["branches", "detail", id] as const,
   },
+
+  regions: {
+    all: () => ["regions"] as const,
+    countries: () => ["regions", "countries"] as const,
+    states: (countryId?: number) => ["regions", "states", { countryId }] as const,
+    cities: (stateId?: number) => ["regions", "cities", { stateId }] as const,
+  },
 };

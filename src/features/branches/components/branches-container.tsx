@@ -14,6 +14,7 @@ import { UIButton } from "@/components/common/UIButton";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
 import { UIInput } from "@/components/common/UIInput/UIInput";
 import { UISelect } from "@/components/common/UISelect/UISelect";
+import { PageHeader, PageContainer } from "@/components/common";
 
 import { useDeleteBranch, useBranches } from "../queries/branches.queries";
 import {
@@ -240,52 +241,43 @@ export function BranchesContainer() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {TITLES.BRANCHES.BRANCH_MANAGEMENT}
-          </h1>
+    <PageContainer>
+      <PageHeader title={TITLES.BRANCHES.BRANCH_MANAGEMENT}>
+        <div className="w-full sm:w-64">
+          <UIInput
+            placeholder="Search by branch name..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-9 py-1"
+          />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="w-full sm:w-64">
-            <UIInput
-              placeholder="Search by branch name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 py-1"
-            />
-          </div>
+        <div className="w-full sm:w-40 shrink-0">
+          <UISelect
+            mode="single"
+            placeholder="Filter by status"
+            options={statusOptions}
+            value={status}
+            onValueChange={(val) => {
+              updateQueryParams({ status: val || "", page: 1 });
+            }}
+            className="h-9"
+          />
+        </div>
 
-          <div className="w-full sm:w-40 shrink-0">
-            <UISelect
-              mode="single"
-              placeholder="Filter by status"
-              options={statusOptions}
-              value={status}
-              onValueChange={(val) => {
-                updateQueryParams({ status: val || "", page: 1 });
-              }}
+        {can(Page.Branches, Permission.CREATE) && (
+          <>
+            <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+            <UIButton
+              leftIcon={<Plus className="size-4" />}
+              onClick={handleOpenCreateModal}
               className="h-9"
-            />
-          </div>
-
-          {can(Page.Branches, Permission.CREATE) && (
-            <>
-              <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
-              <UIButton
-                leftIcon={<Plus className="size-4" />}
-                onClick={handleOpenCreateModal}
-                className="h-9"
-              >
-                Add New Branch
-              </UIButton>
-            </>
-          )}
-        </div>
-      </div>
+            >
+              Add New Branch
+            </UIButton>
+          </>
+        )}
+      </PageHeader>
 
       {/* Table with Server-Side Pagination */}
       <CommonTable
@@ -369,6 +361,6 @@ export function BranchesContainer() {
         onConfirm={handleConfirmDelete}
         isLoading={isDeleting}
       />
-    </div>
+    </PageContainer>
   );
 }

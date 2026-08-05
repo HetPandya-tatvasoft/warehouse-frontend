@@ -13,6 +13,7 @@ import { CommonTable } from "@/components/common/CommonTable";
 import { UIButton } from "@/components/common/UIButton";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
 import { UIInput } from "@/components/common/UIInput/UIInput";
+import { PageHeader, PageContainer } from "@/components/common";
 
 import { useDeleteRole, useRoles } from "../queries/roles.queries";
 import type { IRole, RoleSortField, SortOrder } from "../types/roles.types";
@@ -239,41 +240,32 @@ export function RolesContainer() {
   ]);
 
   return (
-    <div className="space-y-6">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Roles Management
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage system roles, tenant scope, and access control rights.
-          </p>
+    <PageContainer>
+      <PageHeader
+        title="Roles Management"
+        description="Manage system roles, tenant scope, and access control rights."
+      >
+        <div className="w-full sm:w-64">
+          <UIInput
+            placeholder="Search by role name..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-9 py-1"
+          />
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-full sm:w-64">
-            <UIInput
-              placeholder="Search by role name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 py-1"
-            />
-          </div>
+        <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
 
-          <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
-
-          {can(Page.Roles, Permission.CREATE) && (
-            <UIButton
-              leftIcon={<Plus className="size-4" />}
-              onClick={handleOpenCreateModal}
-              className="h-9"
-            >
-              Add New Role
-            </UIButton>
-          )}
-        </div>
-      </div>
+        {can(Page.Roles, Permission.CREATE) && (
+          <UIButton
+            leftIcon={<Plus className="size-4" />}
+            onClick={handleOpenCreateModal}
+            className="h-9"
+          >
+            Add New Role
+          </UIButton>
+        )}
+      </PageHeader>
 
       {/* Table with Server-Side Pagination */}
       <CommonTable
@@ -356,6 +348,6 @@ export function RolesContainer() {
         onConfirm={handleConfirmDelete}
         isLoading={isDeleting}
       />
-    </div>
+    </PageContainer>
   );
 }

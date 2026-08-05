@@ -8,12 +8,12 @@ export const branchUpsertSchema = z.object({
     .min(1, "Branch name is required")
     .max(150, "Branch name cannot exceed 150 characters"),
   status: z.nativeEnum(BranchStatus),
-  addressLine1: z.string().max(255).optional().or(z.literal('')),
-  addressLine2: z.string().max(255).optional().or(z.literal('')),
-  city: z.string().max(100).optional().or(z.literal('')),
-  state: z.string().max(100).optional().or(z.literal('')),
-  country: z.string().max(100).optional().or(z.literal('')),
-  postalCode: z.string().max(20).optional().or(z.literal('')),
+  addressLine1: z.string().max(255).optional().or(z.literal("")),
+  addressLine2: z.string().max(255).optional().or(z.literal("")),
+  cityId: z.number().optional().nullable(),
+  stateId: z.number().optional().nullable(),
+  countryId: z.number().optional().nullable(),
+  postalCode: z.string().max(20).optional().or(z.literal("")),
 });
 
 export type BranchUpsertFormData = z.infer<typeof branchUpsertSchema>;
