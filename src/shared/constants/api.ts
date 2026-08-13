@@ -6,6 +6,7 @@ export const API_ROUTES = {
   ROLES: "/roles",
   USERS: "/users",
   BRANCHES: "/branches",
+  WAREHOUSES: "/warehouses",
   TENANTS: "/platform/tenants",
   BRANCH_SWITCH: "/auth/switch-branch",
 } as const;

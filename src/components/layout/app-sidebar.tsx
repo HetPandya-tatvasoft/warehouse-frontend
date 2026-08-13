@@ -68,7 +68,7 @@ export function AppSidebar({ items }: AppSidebarProps) {
       {/* Mobile Top Navigation Header */}
       <div className="md:hidden flex items-center justify-between h-16 px-4 border-b bg-white dark:bg-zinc-900 sticky top-0 z-40">
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold">
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-purple-600 text-white font-bold">
             <Warehouse className="w-5 h-5" />
           </div>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-base">
@@ -105,7 +105,7 @@ export function AppSidebar({ items }: AppSidebarProps) {
       >
         {/* Brand Logo Header */}
         <div className="h-16 flex items-center gap-3 px-6 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white shadow-sm">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-purple-600 text-white shadow-sm">
             <Warehouse className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
@@ -140,7 +140,7 @@ export function AppSidebar({ items }: AppSidebarProps) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
                     isActive
-                      ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold"
+                      ? "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-semibold"
                       : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
                   )}
                 >
@@ -148,7 +148,7 @@ export function AppSidebar({ items }: AppSidebarProps) {
                     className={cn(
                       "w-5 h-5 transition-colors",
                       isActive
-                        ? "text-indigo-600 dark:text-indigo-400"
+                        ? "text-purple-600 dark:text-purple-400"
                         : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
                     )}
                   />

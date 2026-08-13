@@ -52,4 +52,14 @@ export const MESSAGES = {
     SWITCH_SUCCESS: "Branch switched successfully",
     SWITCH_FAILED: "Failed to switch branch",
   },
+  WAREHOUSES: {
+    LOAD_FAILED: "Failed to fetch warehouses",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading warehouses",
+    CREATE_SUCCESS: "Warehouse created successfully",
+    UPDATE_SUCCESS: "Warehouse updated successfully",
+    DELETE_SUCCESS: "Warehouse deleted successfully",
+    CREATE_FAILED: "Failed to create warehouse",
+    UPDATE_FAILED: "Failed to update warehouse",
+    DELETE_FAILED: "Failed to delete warehouse",
+  },
 } as const;

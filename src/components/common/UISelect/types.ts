@@ -31,6 +31,7 @@ export type SelectFieldAccessors<TOption, TValue> = {
   getOptionValue?: (option: TOption) => TValue;
   getOptionKey?: (option: TOption) => string | number;
   getOptionIcon?: (option: TOption) => ReactNode | undefined;
+  getOptionBadge?: (option: TOption) => ReactNode | undefined;
   getOptionDisabled?: (option: TOption) => boolean;
 };
 
@@ -50,6 +51,7 @@ export type SelectSharedProps<TOption, TValue> = SelectFieldProps &
     options: SelectOptions<TOption>;
     placeholder?: string;
     searchable?: boolean;
+    onSearchChange?: (search: string) => void;
     disabled?: boolean;
     isLoading?: boolean;
     emptyMessage?: string;

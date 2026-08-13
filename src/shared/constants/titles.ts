@@ -25,4 +25,9 @@ export const TITLES = {
     EDIT_BRANCH: "Edit Branch",
     BRANCH_MANAGEMENT: "Branch Management",
   },
+  WAREHOUSES: {
+    CREATE_NEW_WAREHOUSE: "Create New Warehouse",
+    EDIT_WAREHOUSE: "Edit Warehouse",
+    WAREHOUSE_MANAGEMENT: "Warehouse Management",
+  },
 } as const;

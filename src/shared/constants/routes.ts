@@ -4,6 +4,8 @@ export const PAGE_ROUTES = {
   ROLES: "/roles",
   USERS: "/users",
   BRANCHES: "/branches",
+  WAREHOUSES: "/warehouses",
+  WAREHOUSES_CREATE: "/warehouses/create",
   UNAUTHORIZED: "/unauthorized",
   PLATFORM_DASHBOARD: "/platform/dashboard",
   PLATFORM_TENANTS: "/platform/tenants",

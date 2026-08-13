@@ -76,8 +76,10 @@ export function UISelect<TOption, TValue = TOption>(
     fieldDescriptionProps,
     fieldErrorProps,
     getOptionIcon,
+    getOptionBadge,
     by,
     mode,
+    onSearchChange,
   } = props;
 
   const listboxId = React.useId();
@@ -146,6 +148,14 @@ export function UISelect<TOption, TValue = TOption>(
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const handleSearchChange = React.useCallback(
+    (val: string) => {
+      setSearch(val);
+      onSearchChange?.(val);
+    },
+    [onSearchChange],
+  );
 
   const isMulti = mode === "multi";
 
@@ -305,13 +315,17 @@ export function UISelect<TOption, TValue = TOption>(
           <>
             {hasValue ? (
               <span className="truncate">
-                {getSelectedLabel({
-                  value: currentValue as TValue,
-                  options,
-                  getOptionValue,
-                  getOptionLabel,
-                  by,
-                })}
+                {isLoading ? (
+                  <span className="text-muted-foreground animate-pulse">Loading...</span>
+                ) : (
+                  getSelectedLabel({
+                    value: currentValue as TValue,
+                    options,
+                    getOptionValue,
+                    getOptionLabel,
+                    by,
+                  })
+                )}
               </span>
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
@@ -371,12 +385,12 @@ export function UISelect<TOption, TValue = TOption>(
         <CommandInput
           placeholder="Search..."
           value={search}
-          onValueChange={setSearch}
+          onValueChange={handleSearchChange}
         />
       ) : (
         <CommandPrimitive.Input
           value={search}
-          onValueChange={setSearch}
+          onValueChange={handleSearchChange}
           className="sr-only"
         />
       )}
@@ -416,14 +430,14 @@ export function UISelect<TOption, TValue = TOption>(
               </>
             )}
 
-            {/* Options — flat or grouped */}
-            <OptionsList
+             <OptionsList
               options={filteredOptions}
               isMulti={isMulti}
               isSelected={isSelected}
               getOptionLabel={getOptionLabel}
               getOptionKey={getOptionKey}
               getOptionIcon={getOptionIcon}
+              getOptionBadge={getOptionBadge}
               getOptionDisabled={getOptionDisabled}
               onSelect={handleSelect}
             />
@@ -550,6 +564,7 @@ function OptionsList<TOption>({
   getOptionLabel,
   getOptionKey,
   getOptionIcon,
+  getOptionBadge,
   getOptionDisabled,
   onSelect,
 }: {
@@ -559,6 +574,7 @@ function OptionsList<TOption>({
   getOptionLabel: (option: TOption) => string;
   getOptionKey: (option: TOption) => string | number;
   getOptionIcon?: (option: TOption) => React.ReactNode | undefined;
+  getOptionBadge?: (option: TOption) => React.ReactNode | undefined;
   getOptionDisabled?: (option: TOption) => boolean;
   onSelect: (option: TOption) => void;
 }) {
@@ -578,6 +594,7 @@ function OptionsList<TOption>({
                   disabled={getOptionDisabled?.(option) ?? false}
                   getOptionLabel={getOptionLabel}
                   getOptionIcon={getOptionIcon}
+                  getOptionBadge={getOptionBadge}
                   onSelect={onSelect}
                 />
               ))}
@@ -599,6 +616,7 @@ function OptionsList<TOption>({
           disabled={getOptionDisabled?.(option) ?? false}
           getOptionLabel={getOptionLabel}
           getOptionIcon={getOptionIcon}
+          getOptionBadge={getOptionBadge}
           onSelect={onSelect}
         />
       ))}
@@ -614,6 +632,7 @@ function OptionItem<TOption>({
   disabled,
   getOptionLabel,
   getOptionIcon,
+  getOptionBadge,
   onSelect,
 }: {
   option: TOption;
@@ -622,10 +641,12 @@ function OptionItem<TOption>({
   disabled: boolean;
   getOptionLabel: (option: TOption) => string;
   getOptionIcon?: (option: TOption) => React.ReactNode | undefined;
+  getOptionBadge?: (option: TOption) => React.ReactNode | undefined;
   onSelect: (option: TOption) => void;
 }) {
   const icon = getOptionIcon?.(option);
   const label = getOptionLabel(option);
+  const badge = getOptionBadge?.(option);
 
   return (
     <CommandItem
@@ -648,11 +669,14 @@ function OptionItem<TOption>({
       {/* Label */}
       <span className="flex-1 truncate">{label}</span>
 
+      {/* Badge */}
+      {badge && <div className="shrink-0">{badge}</div>}
+
       {/* Check — single mode only */}
       {!isMulti && (
         <Check
           className={cn(
-            "ml-auto size-4 shrink-0",
+            "ml-2 size-4 shrink-0",
             selected ? "opacity-100" : "opacity-0",
           )}
         />
