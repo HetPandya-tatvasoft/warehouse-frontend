@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   GitBranch,
   Warehouse,
+  FolderTree,
 } from "lucide-react";
 import { Page, Permission } from "@/permissions";
 import type { NavItem } from "@/components/layout/app-sidebar";
@@ -42,6 +43,13 @@ export const tenantNavigationItems: NavItem[] = [
     href: PAGE_ROUTES.ROLES,
     icon: ShieldCheck,
     page: Page.Roles,
+    permission: Permission.VIEW,
+  },
+  {
+    label: "Product Categories",
+    href: PAGE_ROUTES.PRODUCT_CATEGORIES,
+    icon: FolderTree,
+    page: Page.ProductCategories,
     permission: Permission.VIEW,
   },
 ];

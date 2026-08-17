@@ -62,4 +62,14 @@ export const MESSAGES = {
     UPDATE_FAILED: "Failed to update warehouse",
     DELETE_FAILED: "Failed to delete warehouse",
   },
+  PRODUCT_CATEGORIES: {
+    LOAD_FAILED: "Failed to fetch product categories",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading product categories",
+    CREATE_SUCCESS: "Product category created successfully",
+    UPDATE_SUCCESS: "Product category updated successfully",
+    DELETE_SUCCESS: "Product category deleted successfully",
+    CREATE_FAILED: "Failed to create product category",
+    UPDATE_FAILED: "Failed to update product category",
+    DELETE_FAILED: "Failed to delete product category",
+  },
 } as const;

@@ -30,4 +30,9 @@ export const TITLES = {
     EDIT_WAREHOUSE: "Edit Warehouse",
     WAREHOUSE_MANAGEMENT: "Warehouse Management",
   },
+  PRODUCT_CATEGORIES: {
+    CREATE_NEW_CATEGORY: "Create New Category",
+    EDIT_CATEGORY: "Edit Category",
+    CATEGORY_MANAGEMENT: "Category Management",
+  },
 } as const;

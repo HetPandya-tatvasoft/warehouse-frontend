@@ -6,6 +6,7 @@ export const PAGE_ROUTES = {
   BRANCHES: "/branches",
   WAREHOUSES: "/warehouses",
   WAREHOUSES_CREATE: "/warehouses/create",
+  PRODUCT_CATEGORIES: "/product-categories",
   UNAUTHORIZED: "/unauthorized",
   PLATFORM_DASHBOARD: "/platform/dashboard",
   PLATFORM_TENANTS: "/platform/tenants",

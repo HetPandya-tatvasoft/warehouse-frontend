@@ -4,6 +4,7 @@ export enum Page {
   Products = "Products",
   Branches = "Branches",
   Warehouses = "Warehouses",
+  ProductCategories = "ProductCategories",
 }
 
 export enum Permission {

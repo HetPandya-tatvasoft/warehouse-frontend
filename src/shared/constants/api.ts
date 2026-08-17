@@ -9,4 +9,5 @@ export const API_ROUTES = {
   WAREHOUSES: "/warehouses",
   TENANTS: "/platform/tenants",
   BRANCH_SWITCH: "/auth/switch-branch",
+  PRODUCT_CATEGORIES: "/product-settings/categories",
 } as const;

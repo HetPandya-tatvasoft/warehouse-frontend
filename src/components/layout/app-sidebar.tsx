@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  Warehouse,
-  LogOut,
-  User,
-  Menu,
-  X,
-  ChevronUp,
-} from "lucide-react";
+import { Warehouse, LogOut, User, Menu, X, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -53,7 +46,9 @@ export function AppSidebar({ items }: AppSidebarProps) {
       },
       onError: (error) => {
         if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message || MESSAGES.AUTH.LOGOUT_FAILED);
+          toast.error(
+            error.response?.data?.message || MESSAGES.AUTH.LOGOUT_FAILED,
+          );
         } else {
           toast.error(MESSAGES.AUTH.LOGOUT_UNEXPECTED);
         }
@@ -126,36 +121,35 @@ export function AppSidebar({ items }: AppSidebarProps) {
           <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
             Navigation
           </div>
-          {items
-            .map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+          {items.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMobileNav}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeMobileNav}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
+                  isActive
+                    ? "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
+                )}
+              >
+                <Icon
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
+                    "w-5 h-5 transition-colors",
                     isActive
-                      ? "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-semibold"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
+                      ? "text-purple-600 dark:text-purple-400"
+                      : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
                   )}
-                >
-                  <Icon
-                    className={cn(
-                      "w-5 h-5 transition-colors",
-                      isActive
-                        ? "text-purple-600 dark:text-purple-400"
-                        : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
-                    )}
-                  />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+                />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* User Info & Logout Footer */}
@@ -187,7 +181,12 @@ export function AppSidebar({ items }: AppSidebarProps) {
                     {user.email}
                   </span>
                 </div>
-                <ChevronUp className={cn("w-4 h-4 text-zinc-400 transition-transform duration-200", isDropdownOpen && "transform rotate-180")} />
+                <ChevronUp
+                  className={cn(
+                    "w-4 h-4 text-zinc-400 transition-transform duration-200",
+                    isDropdownOpen && "transform rotate-180",
+                  )}
+                />
               </button>
             </>
           )}
