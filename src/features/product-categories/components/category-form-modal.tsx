@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { toast } from "sonner";
+import axios from "axios";
+import type { IApiSuccessResponse } from "@/types/api.types";
 
 import { UIModal } from "@/components/common/UIModal/UIModal";
 import { UIInput } from "@/components/common/UIInput/UIInput";
@@ -17,13 +18,13 @@ import {
   type CategoryUpsertFormData,
 } from "../schemas/product-categories.schema";
 import {
-  useCreateCategory,
-  useUpdateCategory,
-} from "../queries/product-categories.queries";
-import {
   ProductCategoryStatus,
   type ICategory,
 } from "../types/product-categories.types";
+import {
+  useCreateCategory,
+  useUpdateCategory,
+} from "../queries/product-categories.queries";
 import { TITLES } from "@/shared/constants/titles";
 import { MESSAGES } from "@/shared/constants/messages";
 
@@ -31,6 +32,9 @@ interface CategoryFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: ICategory | null;
+  parentId?: string | null;
+  parentName?: string;
+  onSuccess?: () => void;
 }
 
 interface StatusOption {
@@ -47,6 +51,9 @@ export function CategoryFormModal({
   open,
   onOpenChange,
   category,
+  parentId,
+  parentName,
+  onSuccess,
 }: CategoryFormModalProps) {
   const isEditing = Boolean(category);
 
@@ -85,22 +92,27 @@ export function CategoryFormModal({
       name: formData.name.trim(),
       description: formData.description?.trim() || undefined,
       status: formData.status,
+      ...(!category?.id ? { parentId: parentId || null } : {}),
     };
 
     const options = {
-      onSuccess: () => {
+      onSuccess: (res: IApiSuccessResponse<ICategory>) => {
         toast.success(
-          category?.id
-            ? MESSAGES.PRODUCT_CATEGORIES.UPDATE_SUCCESS
-            : MESSAGES.PRODUCT_CATEGORIES.CREATE_SUCCESS,
+          res?.message ||
+            (category?.id
+              ? MESSAGES.PRODUCT_CATEGORIES.UPDATE_SUCCESS
+              : MESSAGES.PRODUCT_CATEGORIES.CREATE_SUCCESS),
         );
         onOpenChange(false);
         reset();
+        if (onSuccess) {
+          onSuccess();
+        }
       },
-      onError: (error: unknown) => {
-        if (axios.isAxiosError(error)) {
+      onError: (err: unknown) => {
+        if (axios.isAxiosError(err)) {
           toast.error(
-            error.response?.data?.message ||
+            err.response?.data?.message ||
               (category?.id
                 ? MESSAGES.PRODUCT_CATEGORIES.UPDATE_FAILED
                 : MESSAGES.PRODUCT_CATEGORIES.CREATE_FAILED),
@@ -156,6 +168,14 @@ export function CategoryFormModal({
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+        {parentId && parentName && (
+          <UIInput
+            label="Parent Category"
+            value={parentName}
+            disabled
+          />
+        )}
+
         <UIInput
           label="Category Name"
           required

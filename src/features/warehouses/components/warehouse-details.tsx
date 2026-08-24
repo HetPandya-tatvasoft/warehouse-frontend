@@ -223,20 +223,33 @@ export function WarehouseDetails({ warehouse }: WarehouseDetailsProps) {
     isManagingContacts,
   });
 
-  // Capture initial contact state backup when selected tab changes or editing toggles
-  useEffect(() => {
+  // Capture initial contact state backup during render when selected tab changes or editing toggles
+  const [prevSyncKey, setPrevSyncKey] = useState<{
+    selectedContactId: string;
+    selectedIndex: number;
+    isManagingContacts: boolean;
+  } | null>(null);
+
+  if (
+    !prevSyncKey ||
+    selectedContactId !== prevSyncKey.selectedContactId ||
+    selectedIndex !== prevSyncKey.selectedIndex ||
+    isManagingContacts !== prevSyncKey.isManagingContacts
+  ) {
+    setPrevSyncKey({ selectedContactId, selectedIndex, isManagingContacts });
     const current = getValuesContacts(`contacts.${selectedIndex}`);
-    if (current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setContactBeforeEdit({
-        fullName: current.fullName || "",
-        email: current.email || "",
-        phone: current.phone || "",
-        userId: current.userId || null,
-        id: current.id,
-      });
-    }
-  }, [selectedContactId, selectedIndex, getValuesContacts, isManagingContacts]);
+    setContactBeforeEdit(
+      current
+        ? {
+            fullName: current.fullName || "",
+            email: current.email || "",
+            phone: current.phone || "",
+            userId: current.userId || null,
+            id: current.id,
+          }
+        : null
+    );
+  }
 
   const contactSelectOptions = useMemo(() => {
     return fields.map((field, idx) => {

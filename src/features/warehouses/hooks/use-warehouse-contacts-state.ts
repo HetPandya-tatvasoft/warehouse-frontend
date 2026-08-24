@@ -22,22 +22,24 @@ export function useWarehouseContactsState({
 
   const contactsListWithFallback = useMemo(() => contactsList || [], [contactsList]);
 
-  // Sync selected contact index fallback
-  useEffect(() => {
-    if (fields.length > 0) {
-      const exists = fields.some((f) => f.id === selectedContactId);
-      if (!exists) {
-        const defaultIdx = fields.findIndex(
-          (_, idx) => contactsListWithFallback[idx]?.isDefault,
-        );
-        const targetIdx = defaultIdx !== -1 ? defaultIdx : 0;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedContactId(fields[targetIdx]?.id || fields[0]?.id);
-      }
-    } else {
-      setSelectedContactId("");
+  // Sync selected contact index fallback during render
+  let targetContactId = selectedContactId;
+  if (fields.length > 0) {
+    const exists = fields.some((f) => f.id === selectedContactId);
+    if (!exists) {
+      const defaultIdx = fields.findIndex(
+        (_, idx) => contactsListWithFallback[idx]?.isDefault,
+      );
+      const targetIdx = defaultIdx !== -1 ? defaultIdx : 0;
+      targetContactId = fields[targetIdx]?.id || fields[0]?.id;
     }
-  }, [fields, selectedContactId, contactsListWithFallback]);
+  } else {
+    targetContactId = "";
+  }
+
+  if (targetContactId !== selectedContactId) {
+    setSelectedContactId(targetContactId);
+  }
 
   // Keep track of fields length to automatically select the newly added contact
   const prevLengthRef = useRef(fields.length);
@@ -48,11 +50,21 @@ export function useWarehouseContactsState({
     prevLengthRef.current = fields.length;
   }, [fields]);
 
-  // Sync name edit mode state when selected tab changes or editing mode toggles
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  // Sync name edit mode state when selected tab changes or editing mode toggles during render
+  const [prevSyncKey, setPrevSyncKey] = useState({
+    selectedContactId,
+    selectedIndex,
+    isManagingContacts,
+  });
+
+  if (
+    selectedContactId !== prevSyncKey.selectedContactId ||
+    selectedIndex !== prevSyncKey.selectedIndex ||
+    isManagingContacts !== prevSyncKey.isManagingContacts
+  ) {
+    setPrevSyncKey({ selectedContactId, selectedIndex, isManagingContacts });
     setIsEditingName(false);
-  }, [selectedContactId, selectedIndex, isManagingContacts]);
+  }
 
   // Check if current contact is incomplete
   const isCurrentContactIncomplete = useMemo(() => {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
+import { useSyncedState } from "@/shared/hooks/use-synced-state";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Pencil, Trash2 } from "lucide-react";
@@ -62,12 +63,7 @@ export function WarehousesContainer() {
   const search = searchParams.get("search") || "";
   const status = (searchParams.get("status") as WarehouseStatus) || "";
 
-  const [searchInput, setSearchInput] = useState(search);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchInput(search);
-  }, [search]);
+  const [searchInput, setSearchInput] = useSyncedState(search);
 
   // Debounce search input changes
   useEffect(() => {

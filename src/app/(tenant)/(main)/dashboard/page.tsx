@@ -51,15 +51,6 @@ export default function DashboardPage() {
             {data?.roles?.join(", ") || "Operator"}
           </p>
         </div>
-
-        <div className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs space-y-1">
-          <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-            User ID
-          </span>
-          <p className="text-base font-mono font-semibold text-zinc-700 dark:text-zinc-300 truncate">
-            {data?.id || "N/A"}
-          </p>
-        </div>
       </div>
     </div>
   );
