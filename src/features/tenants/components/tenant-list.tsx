@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
+import { useSyncedState } from "@/shared/hooks/use-synced-state";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Eye, PauseCircle, Pencil, Plus } from "lucide-react";
@@ -43,12 +44,7 @@ export function TenantList() {
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
 
-  const [searchInput, setSearchInput] = useState(search);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchInput(search);
-  }, [search]);
+  const [searchInput, setSearchInput] = useSyncedState(search);
 
   useEffect(() => {
     const timer = setTimeout(() => {

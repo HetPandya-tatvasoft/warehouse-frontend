@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Warehouse, LogOut, User, Menu, X, ChevronUp } from "lucide-react";
+import { Warehouse, LogOut, User, Menu, X, ChevronUp, Settings } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -23,13 +23,20 @@ export interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   page?: Page;
   permission?: Permission;
+  disabled?: boolean;
 }
 
-interface AppSidebarProps {
+export interface NavGroup {
+  title: string;
   items: NavItem[];
 }
 
-export function AppSidebar({ items }: AppSidebarProps) {
+interface AppSidebarProps {
+  items?: NavItem[];
+  groups?: NavGroup[];
+}
+
+export function AppSidebar({ items, groups }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -37,6 +44,48 @@ export function AppSidebar({ items }: AppSidebarProps) {
 
   const { data: user } = useCurrentUser();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+
+  const renderNavItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const isActive =
+      pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+    if (item.disabled) {
+      return (
+        <div
+          key={item.href}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed text-zinc-400 dark:text-zinc-600"
+        >
+          <Icon className="w-5 h-5" />
+          <span>{item.label}</span>
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={closeMobileNav}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
+          isActive
+            ? "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-semibold"
+            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
+        )}
+      >
+        <Icon
+          className={cn(
+            "w-5 h-5 transition-colors",
+            isActive
+              ? "text-purple-600 dark:text-purple-400"
+              : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
+          )}
+        />
+        <span>{item.label}</span>
+      </Link>
+    );
+  };
 
   const handleLogout = () => {
     logout(undefined, {
@@ -117,39 +166,24 @@ export function AppSidebar({ items }: AppSidebarProps) {
         <BranchSwitcher />
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
-            Navigation
-          </div>
-          {items.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMobileNav}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
-                  isActive
-                    ? "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "w-5 h-5 transition-colors",
-                    isActive
-                      ? "text-purple-600 dark:text-purple-400"
-                      : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300",
-                  )}
-                />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+          {groups ? (
+            groups.map((group) => (
+              <div key={group.title} className="space-y-1">
+                <div className="px-3 pb-1.5 text-[10px] font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
+                  {group.title}
+                </div>
+                {group.items.map(renderNavItem)}
+              </div>
+            ))
+          ) : (
+            <div className="space-y-1">
+              <div className="px-3 pb-1.5 text-[10px] font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
+                Navigation
+              </div>
+              {items?.map(renderNavItem)}
+            </div>
+          )}
         </nav>
 
         {/* User Info & Logout Footer */}
@@ -157,7 +191,18 @@ export function AppSidebar({ items }: AppSidebarProps) {
           {user && (
             <>
               {isDropdownOpen && (
-                <div className="absolute bottom-[calc(100%-8px)] left-4 right-4 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-md p-1.5 z-50 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="absolute bottom-[calc(100%-8px)] left-4 right-4 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-md p-1.5 z-50 mb-2 flex flex-col gap-0.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <Link
+                    href={PAGE_ROUTES.SETTINGS}
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      closeMobileNav();
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Settings</span>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     disabled={isLoggingOut}

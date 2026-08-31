@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
@@ -148,13 +148,13 @@ export function RolePermissionsForm({ roleId }: RolePermissionsFormProps) {
   const [editedPermissionMatrix, setEditedPermissionMatrix] =
     useState<IRolePageRights | null>(null);
 
-  useEffect(() => {
-    if (response) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOriginalPermissionMatrix(structuredClone(response));
-      setEditedPermissionMatrix(structuredClone(response));
-    }
-  }, [response]);
+  const [prevResponse, setPrevResponse] = useState<IRolePageRights | null>(null);
+
+  if (response && response !== prevResponse) {
+    setPrevResponse(response);
+    setOriginalPermissionMatrix(structuredClone(response));
+    setEditedPermissionMatrix(structuredClone(response));
+  }
 
   const { mutate: updatePermissions, isPending } = useUpdateRolePageRights();
 

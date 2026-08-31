@@ -17,6 +17,12 @@ export const productCategoriesQueries = {
       queryFn: () => productCategoriesApi.getCategoryById(id),
       enabled: Boolean(id),
     }),
+
+  tree: (cookieHeader?: string) =>
+    apiQueryOptions({
+      queryKey: queryKeys.productCategories.tree(),
+      queryFn: () => productCategoriesApi.getCategoryTree(cookieHeader),
+    }),
 };
 
 function useCategoryMutation<TData, TVariables>(
@@ -58,3 +64,10 @@ export const useUpdateCategory = () =>
 
 export const useDeleteCategory = () =>
   useCategoryMutation(productCategoriesApi.deleteCategory);
+
+export function useCategoryTree(options?: { enabled?: boolean }) {
+  return useQuery({
+    ...productCategoriesQueries.tree(),
+    ...options,
+  });
+}

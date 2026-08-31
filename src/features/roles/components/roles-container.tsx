@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUpdateQueryParams } from "@/shared/hooks/use-update-query-params";
+import { useSyncedState } from "@/shared/hooks/use-synced-state";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Key, Pencil, Plus, Shield, Trash2 } from "lucide-react";
@@ -50,12 +51,7 @@ export function RolesContainer() {
   const sortOrder = (searchParams.get("sortOrder") as SortOrder) || "DESC";
   const search = searchParams.get("search") || "";
 
-  const [searchInput, setSearchInput] = useState(search);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchInput(search);
-  }, [search]);
+  const [searchInput, setSearchInput] = useSyncedState(search);
 
   // Common hook for debouncing  and searching
   useEffect(() => {

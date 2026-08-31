@@ -12,6 +12,8 @@ export interface ICategory {
   name: string;
   description?: string | null;
   status: ProductCategoryStatus;
+  parentId: string | null;
+  children: ICategory[];
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +31,7 @@ export interface IUpsertCategoryPayload {
   name: string;
   description?: string;
   status: ProductCategoryStatus;
+  parentId?: string | null;
 }
 
 export interface ICategoryStatusOption {

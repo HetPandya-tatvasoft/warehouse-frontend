@@ -6,9 +6,13 @@ import {
   GitBranch,
   Warehouse,
   FolderTree,
+  ArrowLeft,
+  Tag,
+  Scale,
+  Percent,
 } from "lucide-react";
 import { Page, Permission } from "@/permissions";
-import type { NavItem } from "@/components/layout/app-sidebar";
+import type { NavItem, NavGroup } from "@/components/layout/app-sidebar";
 
 export const tenantNavigationItems: NavItem[] = [
   {
@@ -37,7 +41,6 @@ export const tenantNavigationItems: NavItem[] = [
     page: Page.Users,
     permission: Permission.VIEW,
   },
-
   {
     label: "Roles",
     href: PAGE_ROUTES.ROLES,
@@ -45,11 +48,52 @@ export const tenantNavigationItems: NavItem[] = [
     page: Page.Roles,
     permission: Permission.VIEW,
   },
+];
+
+export const settingsNavigationGroups: NavGroup[] = [
   {
-    label: "Product Categories",
-    href: PAGE_ROUTES.PRODUCT_CATEGORIES,
-    icon: FolderTree,
-    page: Page.ProductCategories,
-    permission: Permission.VIEW,
+    title: "System",
+    items: [
+      {
+        label: "Back to App",
+        href: PAGE_ROUTES.DASHBOARD,
+        icon: ArrowLeft,
+      },
+    ],
+  },
+  {
+    title: "Product Settings",
+    items: [
+      {
+        label: "Categories",
+        href: PAGE_ROUTES.PRODUCT_CATEGORIES,
+        icon: FolderTree,
+        page: Page.ProductCategories,
+        permission: Permission.VIEW,
+      },
+      {
+        label: "Brands",
+        href: "/settings/product-settings/brands",
+        icon: Tag,
+        disabled: true,
+      },
+      {
+        label: "Units",
+        href: "/settings/product-settings/units",
+        icon: Scale,
+        disabled: true,
+      },
+    ],
+  },
+  {
+    title: "General Settings",
+    items: [
+      {
+        label: "Taxes",
+        href: "/settings/general/taxes",
+        icon: Percent,
+        disabled: true,
+      },
+    ],
   },
 ];

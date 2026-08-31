@@ -63,4 +63,16 @@ export const productCategoriesApi = {
     );
     return response.data;
   },
+
+  getCategoryTree: async (
+    cookieHeader?: string,
+  ): Promise<IApiSuccessResponse<ICategory[]>> => {
+    const response = await apiClient.get<IApiSuccessResponse<ICategory[]>>(
+      `${API_ROUTES.PRODUCT_CATEGORIES}/tree`,
+      {
+        ...(cookieHeader ? { headers: { Cookie: cookieHeader } } : {}),
+      },
+    );
+    return response.data;
+  },
 };
