@@ -8,6 +8,7 @@ export const API_ROUTES = {
   BRANCHES: "/branches",
   WAREHOUSES: "/warehouses",
   TENANTS: "/platform/tenants",
+  TENANTS_ONBOARD: "/platform/tenants/onboard",
   BRANCH_SWITCH: "/auth/switch-branch",
   PRODUCT_CATEGORIES: "/product-settings/categories",
 } as const;

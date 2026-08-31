@@ -32,7 +32,7 @@ export const tenantsApi = {
   ): Promise<IApiSuccessResponse<ITenantOnboardResponse>> => {
     const response = await apiClient.post<
       IApiSuccessResponse<ITenantOnboardResponse>
-    >(API_ROUTES.TENANTS, payload);
+    >(API_ROUTES.TENANTS_ONBOARD, payload);
     return response.data;
   },
 };
