@@ -23,10 +23,11 @@ steps:
         az acr login --name $(acrName)
 
         docker build \
-          --build-arg NEXT_PUBLIC_API_URL=/api \
-          -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
-          -f Dockerfile \
-          .
+        --build-arg NEXT_PUBLIC_API_URL=/api \
+        --build-arg BACKEND_INTERNAL_URL=https://warehouse-backend.bluerock-4c91c171.centralindia.azurecontainerapps.io \
+        -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
+        -f Dockerfile \
+        .
 
         docker push $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion)
 
