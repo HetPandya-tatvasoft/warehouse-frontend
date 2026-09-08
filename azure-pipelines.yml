@@ -8,6 +8,7 @@ variables:
   acrName: 'warehouselearningacr2026'
   imageName: 'warehouse-frontend'
   containerAppName: 'warehouse-frontend'
+  backendContainerAppName: 'warehouse-backend'
   resourceGroup: 'rg-warehouse-learning'
 
 steps:
@@ -22,12 +23,20 @@ steps:
         ACR_LOGIN_SERVER=$(az acr show --name $(acrName) --query loginServer --output tsv)
         az acr login --name $(acrName)
 
+        BACKEND_URL="https://$(az containerapp show \
+          --name $(backendContainerAppName) \
+          --resource-group $(resourceGroup) \
+          --query 'properties.configuration.ingress.fqdn' \
+          --output tsv)"
+
+        echo "Resolved backend URL: $BACKEND_URL"
+
         docker build \
-        --build-arg NEXT_PUBLIC_API_URL=/api \
-        --build-arg BACKEND_INTERNAL_URL=https://warehouse-backend.bluerock-4c91c171.centralindia.azurecontainerapps.io \
-        -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
-        -f Dockerfile \
-        .
+          --build-arg NEXT_PUBLIC_API_URL=/api \
+          --build-arg BACKEND_INTERNAL_URL=$BACKEND_URL \
+          -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
+          -f Dockerfile \
+          .
 
         docker push $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion)
 
