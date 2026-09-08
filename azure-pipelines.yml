@@ -1,0 +1,58 @@
+trigger:
+  - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  acrName: 'warehouselearningacr2026'
+  imageName: 'warehouse-frontend'
+  containerAppName: 'warehouse-frontend'
+  resourceGroup: 'rg-warehouse-learning'
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Build and push image to ACR'
+    inputs:
+      azureSubscription: 'azure-warehouse-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        ACR_LOGIN_SERVER=$(az acr show --name $(acrName) --query loginServer --output tsv)
+        az acr login --name $(acrName)
+
+        docker build \
+          --build-arg NEXT_PUBLIC_API_URL=/api \
+          -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
+          -f Dockerfile \
+          .
+
+        docker push $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion)
+
+  - task: AzureCLI@2
+    displayName: 'Deploy new revision to Container Apps'
+    inputs:
+      azureSubscription: 'azure-warehouse-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        ACR_LOGIN_SERVER=$(az acr show --name $(acrName) --query loginServer --output tsv)
+        az containerapp update \
+          --name $(containerAppName) \
+          --resource-group $(resourceGroup) \
+          --image $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion)
+
+  - task: AzureCLI@2
+    displayName: 'Verify frontend responds'
+    inputs:
+      azureSubscription: 'azure-warehouse-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        sleep 20
+        curl -f --max-time 60 https://warehouse-frontend.bluerock-4c91c171.centralindia.azurecontainerapps.io/login
+        echo ""
+        echo "Frontend check passed."
