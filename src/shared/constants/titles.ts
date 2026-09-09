@@ -1,6 +1,6 @@
 export const TITLES = {
   AUTH: {
-    SIGN_IN: "Sign In",
+    SIGN_IN: "Sign in to the warehouse",
   },
   DASHBOARD: {
     PLATFORM: "Platform Admin Dashboard",
