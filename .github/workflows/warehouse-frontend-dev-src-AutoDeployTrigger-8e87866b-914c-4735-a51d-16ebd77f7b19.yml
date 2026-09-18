@@ -37,6 +37,7 @@ jobs:
           registryPassword: ${{ secrets.WAREHOUSEFRONTENDDEVSRC_REGISTRY_PASSWORD }}
           containerAppName: warehouse-frontend-dev-src
           resourceGroup: rg-warehouse-learning
+          buildArguments: NEXT_PUBLIC_API_URL=/api BACKEND_INTERNAL_URL=https://warehouse-backend.bluerock-4c91c171.centralindia.azurecontainerapps.io
           imageToBuild: warehouselearningacr2026-ebdshya8fdayhjaa.azurecr.io/warehouse-frontend:${{ github.sha }}
           
             
