@@ -1,4 +1,4 @@
-name: Deploy Frontend to Azure App Service
+name: Deploy Frontend to Azure Web App Service
 
 on:
   push:
