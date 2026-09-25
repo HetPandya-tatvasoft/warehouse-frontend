@@ -1,0 +1,62 @@
+name: Deploy Frontend to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: warehouse-frontend-aspr-src
+  NODE_VERSION: '22'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: /api
+          BACKEND_INTERNAL_URL: ${{ secrets.BACKEND_INTERNAL_URL }}
+          # any other NEXT_PUBLIC_* vars your build needs
+
+      - name: Prepare deployment package
+        run: |
+          rm -rf deploy
+          mkdir deploy
+          cp -r .next/standalone/* deploy/
+          mkdir -p deploy/.next
+          cp -r .next/static deploy/.next/static
+          cp -r public deploy/public
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.WAREHOUSEFRONTENDDEVSRC_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.WAREHOUSEFRONTENDDEVSRC_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.WAREHOUSEFRONTENDDEVSRC_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ./deploy
