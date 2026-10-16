@@ -5,6 +5,15 @@ export interface ILoginDto {
   password: string;
 }
 
+export interface IForgotPasswordDto {
+  email: string;
+}
+
+export interface IResetPasswordDto {
+  token: string;
+  password: string;
+}
+
 export interface ICurrentUserBranch {
   id: string;
   name: string;

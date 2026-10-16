@@ -72,6 +72,13 @@ export const settingsNavigationGroups: NavGroup[] = [
         permission: Permission.VIEW,
       },
       {
+        label: "Attributes",
+        href: PAGE_ROUTES.PRODUCT_ATTRIBUTES,
+        icon: Tag,
+        page: Page.ProductAttributes,
+        permission: Permission.VIEW,
+      },
+      {
         label: "Brands",
         href: "/settings/product-settings/brands",
         icon: Tag,

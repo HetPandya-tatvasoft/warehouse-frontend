@@ -1,5 +1,11 @@
 import { apiClient, refreshClient } from "@/lib/api/axios-instance";
-import type { ICurrentUser, IAuthUser, ILoginDto } from "../types/auth.types";
+import type {
+  ICurrentUser,
+  IAuthUser,
+  ILoginDto,
+  IForgotPasswordDto,
+  IResetPasswordDto,
+} from "../types/auth.types";
 import type { IApiSuccessResponse } from "@/types/api.types";
 import { API_ROUTES } from "@/shared/constants/api";
 
@@ -9,6 +15,8 @@ export const authApi = {
   refreshToken,
   me,
   switchBranch,
+  forgotPassword,
+  resetPassword,
 };
 
 async function login(data: ILoginDto): Promise<IApiSuccessResponse<IAuthUser>> {
@@ -44,6 +52,26 @@ async function switchBranch(branchId: string): Promise<IApiSuccessResponse<ICurr
   const response = await apiClient.post<IApiSuccessResponse<ICurrentUser>>(
     API_ROUTES.BRANCH_SWITCH,
     { branchId }
+  );
+  return response.data;
+}
+
+async function forgotPassword(
+  data: IForgotPasswordDto
+): Promise<IApiSuccessResponse<null>> {
+  const response = await apiClient.post<IApiSuccessResponse<null>>(
+    API_ROUTES.FORGOT_PASSWORD,
+    data
+  );
+  return response.data;
+}
+
+async function resetPassword(
+  data: IResetPasswordDto
+): Promise<IApiSuccessResponse<null>> {
+  const response = await apiClient.post<IApiSuccessResponse<null>>(
+    API_ROUTES.RESET_PASSWORD,
+    data
   );
   return response.data;
 }

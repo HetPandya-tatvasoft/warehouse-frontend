@@ -1,4 +1,10 @@
 export const queryKeys = {
+  productAttributes: {
+    all: () => ["product-attributes"] as const,
+    list: <T extends object>(params: T) => ["product-attributes", "list", params] as const,
+    detail: (id: string) => ["product-attributes", "detail", id] as const,
+    values: <T extends object>(id: string, params: T) => ["product-attributes", "detail", id, "values", "list", params] as const,
+  },
   auth: {
     currentUser: () => ["current-user"] as const,
   },

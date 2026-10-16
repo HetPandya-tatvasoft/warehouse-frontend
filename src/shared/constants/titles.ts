@@ -1,6 +1,21 @@
 export const TITLES = {
+  PRODUCT_ATTRIBUTES: {
+    MANAGEMENT: "Product Attributes",
+    ATTRIBUTE_MANAGEMENT: "Product Attributes",
+    VALUES: "Attribute Values",
+    VALUE_MANAGEMENT: "Attribute Values",
+    CREATE: "Create Attribute",
+    CREATE_NEW_ATTRIBUTE: "Create New Attribute",
+    EDIT: "Edit Attribute",
+    EDIT_ATTRIBUTE: "Edit Attribute",
+    CREATE_VALUE: "Create Value",
+    CREATE_NEW_VALUE: "Create New Value",
+    EDIT_VALUE: "Edit Value",
+  },
   AUTH: {
     SIGN_IN: "Sign in to the warehouse",
+    FORGOT_PASSWORD: "Forgot password",
+    RESET_PASSWORD: "Reset your password",
   },
   DASHBOARD: {
     PLATFORM: "Platform Admin Dashboard",

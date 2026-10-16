@@ -12,6 +12,7 @@ import { useLogin } from "../queries/auth.queries";
 import { toast } from "sonner";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { PAGE_ROUTES } from "@/shared/constants/routes";
 import { useQueryClient } from "@tanstack/react-query";
 import { TITLES } from "@/shared/constants/titles";
@@ -134,6 +135,15 @@ export function LoginForm() {
                 autoComplete="current-password"
                 fieldProps={{ className: "space-y-1.5" }}
               />
+
+              <div className="flex items-center justify-end -mt-1">
+                <Link
+                  href={PAGE_ROUTES.FORGOT_PASSWORD}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-500 hover:underline dark:text-blue-400"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <UIButton
                 type="submit"

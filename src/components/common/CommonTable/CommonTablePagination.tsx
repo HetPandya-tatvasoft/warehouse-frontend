@@ -26,8 +26,9 @@ export function CommonTablePagination<TData>({
 
   const totalItems = table.getRowCount();
   const currentRowsCount = table.getRowModel().rows.length;
-  const startIndex = totalItems === 0 ? 0 : pageIndex * pageSize + 1;
-  const endIndex = Math.min(startIndex + currentRowsCount - 1, totalItems);
+  const startIndex = currentRowsCount === 0 || pageIndex * pageSize >= totalItems
+    ? 0 : pageIndex * pageSize + 1;
+  const endIndex = startIndex === 0 ? 0 : Math.min(startIndex + currentRowsCount - 1, totalItems);
 
   const startPage = Math.max(0, Math.min(pageCount - 5, pageIndex - 2));
   const endPage = Math.min(pageCount, startPage + 5);

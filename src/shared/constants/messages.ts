@@ -1,4 +1,32 @@
 export const MESSAGES = {
+  PRODUCT_ATTRIBUTES: {
+    LOAD_FAILED: "Failed to fetch product attributes",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading product attributes",
+    CREATE_SUCCESS: "Product attribute created successfully",
+    UPDATE_SUCCESS: "Product attribute updated successfully",
+    DELETE_SUCCESS: "Product attribute deleted successfully",
+    CREATE_FAILED: "Failed to create product attribute",
+    UPDATE_FAILED: "Failed to update product attribute",
+    DELETE_FAILED: "Failed to delete product attribute",
+    STATUS_ACTIVATED: "Product attribute activated successfully",
+    STATUS_DEACTIVATED: "Product attribute deactivated successfully",
+    SAVED: "Changes saved successfully.",
+    DELETED: "Deleted permanently.",
+    INACTIVE_PARENT:
+      "This attribute is inactive. Its values remain manageable, but are unavailable for selection. Individual value statuses are unchanged.",
+  },
+  PRODUCT_ATTRIBUTE_VALUES: {
+    LOAD_FAILED: "Failed to fetch attribute values",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading attribute values",
+    CREATE_SUCCESS: "Attribute value created successfully",
+    UPDATE_SUCCESS: "Attribute value updated successfully",
+    DELETE_SUCCESS: "Attribute value deleted successfully",
+    CREATE_FAILED: "Failed to create attribute value",
+    UPDATE_FAILED: "Failed to update attribute value",
+    DELETE_FAILED: "Failed to delete attribute value",
+    STATUS_ACTIVATED: "Attribute value activated successfully",
+    STATUS_DEACTIVATED: "Attribute value deactivated successfully",
+  },
   COMMON: {
     UNEXPECTED_ERROR: "An unexpected error occurred. Please try again.",
     SOMETHING_WENT_WRONG: "Something went wrong, please try again",
@@ -9,6 +37,11 @@ export const MESSAGES = {
     LOGOUT_SUCCESS: "Logout successful",
     LOGOUT_FAILED: "Logout failed",
     LOGOUT_UNEXPECTED: "Something went wrong, try again later!",
+    FORGOT_PASSWORD_SUCCESS:
+      "If an account exists for this email, a password reset link has been sent.",
+    RESET_PASSWORD_SUCCESS: "Your password has been reset successfully.",
+    INVALID_OR_EXPIRED_RESET_TOKEN:
+      "The password reset link is invalid or has expired.",
   },
   TENANTS: {
     ONBOARD_FAILED: "Failed to onboard tenant",

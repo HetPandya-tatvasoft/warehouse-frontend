@@ -50,10 +50,12 @@ export function setupAuthInterceptor() {
         return Promise.reject(error);
       }
 
-      // Do not attempt to refresh token if the login or logout requests failed (invalid credentials or logged out)
+      // Do not attempt to refresh token if auth requests failed (login, logout, forgot-password, reset-password)
       if (
         originalRequest.url?.includes("auth/login") ||
-        originalRequest.url?.includes("auth/logout")
+        originalRequest.url?.includes("auth/logout") ||
+        originalRequest.url?.includes("auth/forgot-password") ||
+        originalRequest.url?.includes("auth/reset-password")
       ) {
         return Promise.reject(error);
       }

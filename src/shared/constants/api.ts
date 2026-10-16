@@ -1,6 +1,8 @@
 export const API_ROUTES = {
   LOGIN: "/auth/login",
   LOGOUT: "/auth/logout",
+  FORGOT_PASSWORD: "/auth/forgot-password",
+  RESET_PASSWORD: "/auth/reset-password",
   ME: "/auth/me",
   REFRESH_TOKEN: "/auth/refresh-token",
   ROLES: "/roles",
@@ -11,4 +13,5 @@ export const API_ROUTES = {
   TENANTS_ONBOARD: "/platform/tenants/onboard",
   BRANCH_SWITCH: "/auth/switch-branch",
   PRODUCT_CATEGORIES: "/product-settings/categories",
+  PRODUCT_ATTRIBUTES: "/product-attributes",
 } as const;
