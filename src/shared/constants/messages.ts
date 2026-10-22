@@ -14,10 +14,20 @@ export const MESSAGES = {
     DELETED: "Deleted permanently.",
     INACTIVE_PARENT:
       "This attribute is inactive. Its values remain manageable, but are unavailable for selection. Individual value statuses are unchanged.",
+    EMPTY_STATE: "No attributes found.",
+    EMPTY_SEARCH_STATE:
+      "No matching attributes found. Try adjusting your search or filters.",
+    MODAL_CREATE_DESCRIPTION: "Add a new product attribute.",
+    MODAL_EDIT_DESCRIPTION: "Update the details for this attribute.",
+    VALIDATION: {
+      NAME_REQUIRED: "Attribute name is required",
+      NAME_MAX_LENGTH: "Attribute name cannot exceed 150 characters",
+    },
   },
   PRODUCT_ATTRIBUTE_VALUES: {
     LOAD_FAILED: "Failed to fetch attribute values",
-    LOAD_UNEXPECTED: "An unexpected error occurred while loading attribute values",
+    LOAD_UNEXPECTED:
+      "An unexpected error occurred while loading attribute values",
     CREATE_SUCCESS: "Attribute value created successfully",
     UPDATE_SUCCESS: "Attribute value updated successfully",
     DELETE_SUCCESS: "Attribute value deleted successfully",
@@ -26,6 +36,14 @@ export const MESSAGES = {
     DELETE_FAILED: "Failed to delete attribute value",
     STATUS_ACTIVATED: "Attribute value activated successfully",
     STATUS_DEACTIVATED: "Attribute value deactivated successfully",
+    EMPTY_STATE: "No attribute values found.",
+    EMPTY_SEARCH_STATE:
+      "No matching values found. Try adjusting your search or filters.",
+    MODAL_DESCRIPTION: "Manage a value for this attribute.",
+    VALIDATION: {
+      LABEL_REQUIRED: "Value label is required",
+      LABEL_MAX_LENGTH: "Value label cannot exceed 150 characters",
+    },
   },
   COMMON: {
     UNEXPECTED_ERROR: "An unexpected error occurred. Please try again.",
@@ -104,5 +122,28 @@ export const MESSAGES = {
     CREATE_FAILED: "Failed to create product category",
     UPDATE_FAILED: "Failed to update product category",
     DELETE_FAILED: "Failed to delete product category",
+    ASSIGN_ATTRIBUTES_FAILED: "Failed to assign attributes",
+    UNASSIGN_ATTRIBUTE_FAILED: "Failed to unassign attribute",
+  },
+  PRODUCT_BRANDS: {
+    LOAD_FAILED: "Failed to fetch brands",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading brands",
+    CREATE_SUCCESS: "Brand created successfully",
+    UPDATE_SUCCESS: "Brand updated successfully",
+    DELETE_SUCCESS: "Brand deleted successfully",
+    CREATE_FAILED: "Failed to create brand",
+    UPDATE_FAILED: "Failed to update brand",
+    DELETE_FAILED: "Failed to delete brand",
+    STATUS_ACTIVATED: "Brand activated successfully",
+    STATUS_DEACTIVATED: "Brand deactivated successfully",
+    EMPTY_STATE: "No brands found.",
+    EMPTY_SEARCH_STATE:
+      "No matching brands found. Try adjusting your search or filters.",
+    MODAL_CREATE_DESCRIPTION: "Add a new product brand.",
+    MODAL_EDIT_DESCRIPTION: "Update the details for this brand.",
+    VALIDATION: {
+      NAME_REQUIRED: "Brand name is required",
+      NAME_MAX_LENGTH: "Brand name cannot exceed 150 characters",
+    },
   },
 } as const;

@@ -85,16 +85,10 @@ export function ProductAttributesContainer() {
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const pageSize = Math.max(1, Number(searchParams.get("pageSize")) || 10);
   const sortBy =
-    searchParams.get("sortBy") === "name" ? "name" : ("createdAt" as AttributeSortField);
-  const sortOrder =
-    (searchParams.get("sortOrder") as SortOrder) === "ASC" ? "ASC" : "DESC";
-  const search = searchParams.get("search")?.trim() || "";
-  const rawStatus = searchParams.get("status");
-  const status =
-    rawStatus === ProductAttributeStatus.ACTIVE ||
-    rawStatus === ProductAttributeStatus.INACTIVE
-      ? rawStatus
-      : "";
+    (searchParams.get("sortBy") as AttributeSortField) || "createdAt";
+  const sortOrder = (searchParams.get("sortOrder") as SortOrder) || "DESC";
+  const search = searchParams.get("search") || "";
+  const status = (searchParams.get("status") as ProductAttributeStatus) || "";
 
   const controls: IGetAttributesParams = {
     page,
@@ -110,18 +104,17 @@ export function ProductAttributesContainer() {
 
   // Debounced search query parameter synchronization
   useEffect(() => {
-    if (
-      searchInput === debouncedSearch &&
-      debouncedSearch.trim() !== search
-    ) {
+    if (searchInput === debouncedSearch && debouncedSearch.trim() !== search) {
       updateQueryParams({ search: debouncedSearch.trim(), page: 1 });
     }
   }, [debouncedSearch, searchInput, search, updateQueryParams]);
 
   const query = useAttributes(controls, { enabled: canView });
 
-  const { mutate: updateAttribute, isPending: isUpdating } = useUpdateAttribute();
-  const { mutate: deleteAttribute, isPending: isDeleting } = useDeleteAttribute();
+  const { mutate: updateAttribute, isPending: isUpdating } =
+    useUpdateAttribute();
+  const { mutate: deleteAttribute, isPending: isDeleting } =
+    useDeleteAttribute();
 
   const isPendingAction = isUpdating || isDeleting;
 
@@ -198,39 +191,36 @@ export function ProductAttributesContainer() {
         },
         {
           onSuccess: (res) => {
-            toast.success(
-              res?.message ||
-                (nextStatus === ProductAttributeStatus.ACTIVE
-                  ? MESSAGES.PRODUCT_ATTRIBUTES.STATUS_ACTIVATED
-                  : MESSAGES.PRODUCT_ATTRIBUTES.STATUS_DEACTIVATED),
-            );
+            toast.success(res?.message);
             setStatusTogglingId(null);
           },
           onError: (error) => {
             setStatusTogglingId(null);
-            const message = axios.isAxiosError<IApiErrorResponse>(error)
-              ? error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_FAILED
-              : MESSAGES.COMMON.UNEXPECTED_ERROR;
-            if (
-              !(
-                axios.isAxiosError<unknown>(error) &&
-                error.response?.status === 403
-              )
-            ) {
-              toast.error(message);
-            }
-            if (
-              axios.isAxiosError<unknown>(error) &&
-              error.response?.status === 404
-            ) {
-              void query.refetch();
+            if (axios.isAxiosError<IApiErrorResponse>(error)) {
+              if (error.response?.status !== 403) {
+                toast.error(
+                  error.response?.data?.message ||
+                    MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_FAILED,
+                );
+              }
+              if (error.response?.status === 404) {
+                void query.refetch();
+              }
+            } else {
+              toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
             }
           },
         },
       );
     },
-    [canView, canUpdate, isPendingAction, statusTogglingId, updateAttribute, query],
+    [
+      canView,
+      canUpdate,
+      isPendingAction,
+      statusTogglingId,
+      updateAttribute,
+      query,
+    ],
   );
 
   const handleConfirmDelete = useCallback(() => {
@@ -238,43 +228,43 @@ export function ProductAttributesContainer() {
 
     deleteAttribute(deletingAttribute.id, {
       onSuccess: (res) => {
-        toast.success(
-          res?.message || MESSAGES.PRODUCT_ATTRIBUTES.DELETE_SUCCESS,
-        );
+        toast.success(res?.message);
         setIsConfirmDeleteOpen(false);
         setDeletingAttribute(null);
       },
       onError: (error) => {
-        const message = axios.isAxiosError<IApiErrorResponse>(error)
-          ? error.response?.data?.message ||
-            MESSAGES.PRODUCT_ATTRIBUTES.DELETE_FAILED
-          : MESSAGES.COMMON.UNEXPECTED_ERROR;
-        if (
-          !(
-            axios.isAxiosError<unknown>(error) &&
-            error.response?.status === 403
-          )
-        ) {
-          toast.error(message);
-        }
-        if (
-          axios.isAxiosError<unknown>(error) &&
-          error.response?.status === 404
-        ) {
-          void query.refetch();
+        if (axios.isAxiosError<IApiErrorResponse>(error)) {
+          if (error.response?.status !== 403) {
+            toast.error(
+              error.response?.data?.message ||
+                MESSAGES.PRODUCT_ATTRIBUTES.DELETE_FAILED,
+            );
+          }
+          if (error.response?.status === 404) {
+            void query.refetch();
+          }
+        } else {
+          toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
         }
       },
     });
-  }, [deletingAttribute, canView, canDelete, isPendingAction, deleteAttribute, query]);
+  }, [
+    deletingAttribute,
+    canView,
+    canDelete,
+    isPendingAction,
+    deleteAttribute,
+    query,
+  ]);
 
   const columns = useMemo<ColumnDef<IProductAttribute>[]>(() => {
     return [
       {
         accessorKey: "name",
-        header: "Attribute Name",
+        header: () => <div className="w-full text-center">Attribute Name</div>,
         enableSorting: true,
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100 break-words">
               {row.original.name}
             </span>
@@ -283,60 +273,60 @@ export function ProductAttributesContainer() {
       },
       {
         accessorKey: "valueCount",
-        header: "Values",
+        header: () => <div className="w-full text-center">Values</div>,
         enableSorting: false,
         cell: ({ row }) => (
-          <span className="text-sm text-zinc-600 dark:text-zinc-300">
+          <div className="text-center text-sm text-zinc-600 dark:text-zinc-300">
             {row.original.valueCount}
-          </span>
+          </div>
         ),
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: () => <div className="w-full text-center">Status</div>,
         enableSorting: false,
         cell: ({ row }) => {
           const attributeStatus = row.original.status;
           return (
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                statusColors[attributeStatus] ||
-                "bg-zinc-50 text-zinc-700 border-zinc-200"
-              }`}
-            >
-              {attributeStatus === ProductAttributeStatus.ACTIVE
-                ? "Active"
-                : "Inactive"}
-            </span>
+            <div className="flex items-center justify-center">
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  statusColors[attributeStatus] ||
+                  "bg-zinc-50 text-zinc-700 border-zinc-200"
+                }`}
+              >
+                {attributeStatus === ProductAttributeStatus.ACTIVE
+                  ? "Active"
+                  : "Inactive"}
+              </span>
+            </div>
           );
         },
       },
       {
         accessorKey: "createdAt",
-        header: "Created At",
+        header: () => <div className="w-full text-center">Created At</div>,
         cell: ({ row }) => (
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="text-center text-sm text-zinc-500 dark:text-zinc-400">
             {formatDate(row.original.createdAt)}
-          </span>
+          </div>
         ),
       },
       {
         id: "actions",
-        header: () => <div className="text-right">Actions</div>,
+        header: () => <div className="w-full text-center">Actions</div>,
         enableSorting: false,
         cell: ({ row }) => {
           const attribute = row.original;
           const isToggling = statusTogglingId === attribute.id;
-
           return (
-            <div className="flex items-center justify-end gap-1.5">
+            <div className="flex items-center justify-center gap-1.5">
               <Link
                 href={`${PAGE_ROUTES.PRODUCT_ATTRIBUTES}/${encodeURIComponent(attribute.id)}/values`}
                 className="text-xs font-medium text-primary hover:underline underline-offset-4 mr-1 whitespace-nowrap"
               >
                 Manage Values
               </Link>
-
               {canUpdate && (
                 <>
                   <UIButton
@@ -362,7 +352,6 @@ export function ProductAttributesContainer() {
                   </UIButton>
                 </>
               )}
-
               {canDelete && (
                 <UIButton
                   variant="ghost"
@@ -386,8 +375,8 @@ export function ProductAttributesContainer() {
     isPendingAction,
     statusTogglingId,
     handleOpenEditModal,
-    handleOpenDeleteConfirm,
     handleToggleStatus,
+    handleOpenDeleteConfirm,
   ]);
 
   const queryErrorMessage = axios.isAxiosError<IApiErrorResponse>(query.error)
@@ -437,7 +426,7 @@ export function ProductAttributesContainer() {
 
       {query.isError ? (
         <UIErrorState
-          title="Failed to load attributes"
+          title={MESSAGES.PRODUCT_ATTRIBUTES.LOAD_FAILED}
           description={queryErrorMessage}
           actionText="Try Again"
           onAction={() => {
@@ -455,8 +444,8 @@ export function ProductAttributesContainer() {
           emptyState={
             <div className="py-12 text-center text-sm text-muted-foreground">
               {controls.search || controls.status
-                ? "No matching attributes found. Try adjusting your search or filters."
-                : "No attributes found."}
+                ? MESSAGES.PRODUCT_ATTRIBUTES.EMPTY_SEARCH_STATE
+                : MESSAGES.PRODUCT_ATTRIBUTES.EMPTY_STATE}
             </div>
           }
           tableOptions={{
@@ -500,11 +489,10 @@ export function ProductAttributesContainer() {
               ];
               const next =
                 typeof updater === "function" ? updater(current) : updater;
-              const first = next[0];
-
-              if (first && (first.id === "name" || first.id === "createdAt")) {
+              if (next.length > 0) {
+                const first = next[0];
                 updateQueryParams({
-                  sortBy: first.id,
+                  sortBy: first.id as AttributeSortField,
                   sortOrder: first.desc ? "DESC" : "ASC",
                   page: 1,
                 });

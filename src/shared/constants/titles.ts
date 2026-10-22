@@ -50,4 +50,9 @@ export const TITLES = {
     EDIT_CATEGORY: "Edit Category",
     CATEGORY_MANAGEMENT: "Category Management",
   },
+  PRODUCT_BRANDS: {
+    BRAND_MANAGEMENT: "Brand Management",
+    CREATE_NEW_BRAND: "Create New Brand",
+    EDIT_BRAND: "Edit Brand",
+  },
 } as const;

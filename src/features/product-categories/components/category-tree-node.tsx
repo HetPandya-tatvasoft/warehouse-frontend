@@ -7,6 +7,7 @@ import {
   Plus,
   Pencil,
   Move,
+  Tag,
   Power,
   Trash2,
 } from "lucide-react";
@@ -43,6 +44,7 @@ export function CategoryTreeNode({
 
   const hasChildren = category.children && category.children.length > 0;
 
+  const hasViewPermission = can(Page.ProductCategories, Permission.VIEW);
   const hasCreatePermission = can(Page.ProductCategories, Permission.CREATE);
   const hasUpdatePermission = can(Page.ProductCategories, Permission.UPDATE);
   const hasDeletePermission = can(Page.ProductCategories, Permission.DELETE);
@@ -125,7 +127,8 @@ export function CategoryTreeNode({
         </span>
 
         {/* Action Menu */}
-        {(hasCreatePermission ||
+        {(hasViewPermission ||
+          hasCreatePermission ||
           hasUpdatePermission ||
           hasDeletePermission) && (
           <DropdownMenu>
@@ -165,19 +168,31 @@ export function CategoryTreeNode({
                     <Move className="size-4" />
                     <span>Move</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onActionClick?.("toggle_status", category)}
-                    className="gap-2 cursor-pointer"
-                  >
-                    <Power className="size-4" />
-                    <span>
-                      {category.status === ProductCategoryStatus.ACTIVE
-                        ? "Deactivate"
-                        : "Activate"}
-                    </span>
-                  </DropdownMenuItem>
                 </>
               )}
+              {hasViewPermission && (
+                <DropdownMenuItem
+                  onClick={() => onActionClick?.("attributes", category)}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Tag className="size-4" />
+                  <span>Attributes</span>
+                </DropdownMenuItem>
+              )}
+              {hasUpdatePermission && (
+                <DropdownMenuItem
+                  onClick={() => onActionClick?.("toggle_status", category)}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Power className="size-4" />
+                  <span>
+                    {category.status === ProductCategoryStatus.ACTIVE
+                      ? "Deactivate"
+                      : "Activate"}
+                  </span>
+                </DropdownMenuItem>
+              )}
+
               {hasDeletePermission && (
                 <>
                   <DropdownMenuSeparator />

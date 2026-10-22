@@ -32,6 +32,7 @@ import {
   ProductAttributeStatus,
   type IAttributeValue,
   type IGetAttributeValuesParams,
+  type AttributeValueSortField,
   type SortOrder,
 } from "../types/product-attributes.types";
 import {
@@ -90,20 +91,16 @@ export function AttributeValuesContainer({
 
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const pageSize = Math.max(1, Number(searchParams.get("pageSize")) || 10);
-  const sortOrder =
-    (searchParams.get("sortOrder") as SortOrder) === "ASC" ? "ASC" : "DESC";
-  const search = searchParams.get("search")?.trim() || "";
-  const rawStatus = searchParams.get("status");
-  const status =
-    rawStatus === ProductAttributeStatus.ACTIVE ||
-    rawStatus === ProductAttributeStatus.INACTIVE
-      ? rawStatus
-      : "";
+  const sortBy =
+    (searchParams.get("sortBy") as AttributeValueSortField) || "createdAt";
+  const sortOrder = (searchParams.get("sortOrder") as SortOrder) || "DESC";
+  const search = searchParams.get("search") || "";
+  const status = (searchParams.get("status") as ProductAttributeStatus) || "";
 
   const controls: IGetAttributeValuesParams = {
     page,
     pageSize,
-    sortBy: "createdAt",
+    sortBy,
     sortOrder,
     search: search || undefined,
     status: (status as ProductAttributeStatus) || undefined,
@@ -114,10 +111,7 @@ export function AttributeValuesContainer({
 
   // Debounced search query parameter synchronization
   useEffect(() => {
-    if (
-      searchInput === debouncedSearch &&
-      debouncedSearch.trim() !== search
-    ) {
+    if (searchInput === debouncedSearch && debouncedSearch.trim() !== search) {
       updateQueryParams({ search: debouncedSearch.trim(), page: 1 });
     }
   }, [debouncedSearch, searchInput, search, updateQueryParams]);
@@ -205,33 +199,23 @@ export function AttributeValuesContainer({
         },
         {
           onSuccess: (res) => {
-            toast.success(
-              res?.message ||
-                (nextStatus === ProductAttributeStatus.ACTIVE
-                  ? MESSAGES.PRODUCT_ATTRIBUTE_VALUES.STATUS_ACTIVATED
-                  : MESSAGES.PRODUCT_ATTRIBUTE_VALUES.STATUS_DEACTIVATED),
-            );
+            toast.success(res?.message);
             setStatusTogglingId(null);
           },
           onError: (error) => {
             setStatusTogglingId(null);
-            const message = axios.isAxiosError<IApiErrorResponse>(error)
-              ? error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTE_VALUES.UPDATE_FAILED
-              : MESSAGES.COMMON.UNEXPECTED_ERROR;
-            if (
-              !(
-                axios.isAxiosError<unknown>(error) &&
-                error.response?.status === 403
-              )
-            ) {
-              toast.error(message);
-            }
-            if (
-              axios.isAxiosError<unknown>(error) &&
-              error.response?.status === 404
-            ) {
-              void query.refetch();
+            if (axios.isAxiosError<IApiErrorResponse>(error)) {
+              if (error.response?.status !== 403) {
+                toast.error(
+                  error.response?.data?.message ||
+                    MESSAGES.PRODUCT_ATTRIBUTE_VALUES.UPDATE_FAILED,
+                );
+              }
+              if (error.response?.status === 404) {
+                void query.refetch();
+              }
+            } else {
+              toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
             }
           },
         },
@@ -255,31 +239,24 @@ export function AttributeValuesContainer({
       { attributeId, id: deletingValue.id },
       {
         onSuccess: (res) => {
-          toast.success(
-            res?.message || MESSAGES.PRODUCT_ATTRIBUTE_VALUES.DELETE_SUCCESS,
-          );
+          toast.success(res?.message);
           setIsConfirmDeleteOpen(false);
           setDeletingValue(null);
         },
         onError: (error) => {
-          const message = axios.isAxiosError<IApiErrorResponse>(error)
-            ? error.response?.data?.message ||
-              MESSAGES.PRODUCT_ATTRIBUTE_VALUES.DELETE_FAILED
-            : MESSAGES.COMMON.UNEXPECTED_ERROR;
-          if (
-            !(
-              axios.isAxiosError<unknown>(error) &&
-              error.response?.status === 403
-            )
-          ) {
-            toast.error(message);
-          }
-          if (
-            axios.isAxiosError<unknown>(error) &&
-            error.response?.status === 404
-          ) {
-            void query.refetch();
-            void parent.refetch();
+          if (axios.isAxiosError<IApiErrorResponse>(error)) {
+            if (error.response?.status !== 403) {
+              toast.error(
+                error.response?.data?.message ||
+                  MESSAGES.PRODUCT_ATTRIBUTE_VALUES.DELETE_FAILED,
+              );
+            }
+            if (error.response?.status === 404) {
+              void query.refetch();
+              void parent.refetch();
+            }
+          } else {
+            toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
           }
         },
       },
@@ -299,10 +276,10 @@ export function AttributeValuesContainer({
     return [
       {
         accessorKey: "label",
-        header: "Value Label",
-        enableSorting: false,
+        header: () => <div className="w-full text-center">Value Label</div>,
+        enableSorting: true,
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100 break-words">
               {row.original.label}
             </span>
@@ -311,45 +288,46 @@ export function AttributeValuesContainer({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: () => <div className="w-full text-center">Status</div>,
         enableSorting: false,
         cell: ({ row }) => {
           const valStatus = row.original.status;
           return (
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                statusColors[valStatus] ||
-                "bg-zinc-50 text-zinc-700 border-zinc-200"
-              }`}
-            >
-              {valStatus === ProductAttributeStatus.ACTIVE
-                ? "Active"
-                : "Inactive"}
-            </span>
+            <div className="flex items-center justify-center">
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  statusColors[valStatus] ||
+                  "bg-zinc-50 text-zinc-700 border-zinc-200"
+                }`}
+              >
+                {valStatus === ProductAttributeStatus.ACTIVE
+                  ? "Active"
+                  : "Inactive"}
+              </span>
+            </div>
           );
         },
       },
       {
         accessorKey: "createdAt",
-        header: "Created At",
+        header: () => <div className="w-full text-center">Created At</div>,
         cell: ({ row }) => (
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center justify-center gap-1.5 text-zinc-500 dark:text-zinc-400">
             {formatDate(row.original.createdAt)}
-          </span>
+          </div>
         ),
       },
       ...(canUpdate || canDelete
         ? [
             {
               id: "actions",
-              header: () => <div className="text-right">Actions</div>,
+              header: () => <div className="w-full text-center">Actions</div>,
               enableSorting: false,
               cell: ({ row }: { row: { original: IAttributeValue } }) => {
                 const valueItem = row.original;
                 const isToggling = statusTogglingId === valueItem.id;
-
                 return (
-                  <div className="flex items-center justify-end gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     {canUpdate && (
                       <>
                         <UIButton
@@ -375,7 +353,6 @@ export function AttributeValuesContainer({
                         </UIButton>
                       </>
                     )}
-
                     {canDelete && (
                       <UIButton
                         variant="ghost"
@@ -401,8 +378,8 @@ export function AttributeValuesContainer({
     isPendingAction,
     statusTogglingId,
     handleOpenEditModal,
-    handleOpenDeleteConfirm,
     handleToggleStatus,
+    handleOpenDeleteConfirm,
   ]);
 
   if (parent.isLoading) {
@@ -517,7 +494,7 @@ export function AttributeValuesContainer({
 
       {query.isError ? (
         <UIErrorState
-          title="Failed to load attribute values"
+          title={MESSAGES.PRODUCT_ATTRIBUTE_VALUES.LOAD_FAILED}
           description={queryErrorMessage}
           actionText="Try Again"
           onAction={() => {
@@ -535,8 +512,8 @@ export function AttributeValuesContainer({
           emptyState={
             <div className="py-12 text-center text-sm text-muted-foreground">
               {controls.search || controls.status
-                ? "No matching values found. Try adjusting your search or filters."
-                : "No values found."}
+                ? MESSAGES.PRODUCT_ATTRIBUTE_VALUES.EMPTY_SEARCH_STATE
+                : MESSAGES.PRODUCT_ATTRIBUTE_VALUES.EMPTY_STATE}
             </div>
           }
           tableOptions={{
@@ -580,11 +557,10 @@ export function AttributeValuesContainer({
               ];
               const next =
                 typeof updater === "function" ? updater(current) : updater;
-              const first = next[0];
-
-              if (first && first.id === "createdAt") {
+              if (next.length > 0) {
+                const first = next[0];
                 updateQueryParams({
-                  sortBy: first.id,
+                  sortBy: first.id as AttributeValueSortField,
                   sortOrder: first.desc ? "DESC" : "ASC",
                   page: 1,
                 });

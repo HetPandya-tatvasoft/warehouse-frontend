@@ -5,6 +5,11 @@ export const queryKeys = {
     detail: (id: string) => ["product-attributes", "detail", id] as const,
     values: <T extends object>(id: string, params: T) => ["product-attributes", "detail", id, "values", "list", params] as const,
   },
+  brands: {
+    all: () => ["brands"] as const,
+    list: <T extends object>(params?: T) => ["brands", "list", params] as const,
+    detail: (id: string) => ["brands", "detail", id] as const,
+  },
   auth: {
     currentUser: () => ["current-user"] as const,
   },
@@ -44,7 +49,13 @@ export const queryKeys = {
     list: <T extends object>(params?: T) => ["product-categories", "list", params] as const,
     detail: (id: string) => ["product-categories", "detail", id] as const,
     tree: () => ["product-categories", "tree"] as const,
+    attributes: (categoryId: string) => ["product-categories", "attributes", categoryId] as const,
+    effectiveAttributes: (categoryId: string) =>
+      ["product-categories", "attributes", categoryId, "effective"] as const,
+    eligibleAttributes: (categoryId: string) =>
+      ["product-categories", "attributes", categoryId, "eligible"] as const,
   },
+
 
   regions: {
     all: () => ["regions"] as const,

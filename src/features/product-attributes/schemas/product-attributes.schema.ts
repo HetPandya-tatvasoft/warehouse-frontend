@@ -1,12 +1,13 @@
 import { z } from "zod";
+import { MESSAGES } from "@/shared/constants/messages";
 import { ProductAttributeStatus } from "../types/product-attributes.types";
 
 export const attributeUpsertSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Attribute name is required")
-    .max(150, "Attribute name cannot exceed 150 characters"),
+    .min(1, MESSAGES.PRODUCT_ATTRIBUTES.VALIDATION.NAME_REQUIRED)
+    .max(150, MESSAGES.PRODUCT_ATTRIBUTES.VALIDATION.NAME_MAX_LENGTH),
   status: z.enum(ProductAttributeStatus),
 });
 
@@ -14,8 +15,8 @@ export const attributeValueUpsertSchema = z.object({
   label: z
     .string()
     .trim()
-    .min(1, "Value label is required")
-    .max(150, "Value label cannot exceed 150 characters"),
+    .min(1, MESSAGES.PRODUCT_ATTRIBUTE_VALUES.VALIDATION.LABEL_REQUIRED)
+    .max(150, MESSAGES.PRODUCT_ATTRIBUTE_VALUES.VALIDATION.LABEL_MAX_LENGTH),
   status: z.enum(ProductAttributeStatus),
 });
 

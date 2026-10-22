@@ -70,10 +70,16 @@ function useAttributeMutation<TData, TVariables>(
 
   return useMutation<TData, Error, TVariables>({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.productAttributes.all(),
-      }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productAttributes.all(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productCategories.all(),
+        }),
+      ]);
+    },
   });
 }
 
@@ -101,9 +107,14 @@ export function useDeleteAttribute() {
       queryClient.removeQueries({
         queryKey: queryKeys.productAttributes.detail(id),
       });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.productAttributes.all(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productAttributes.all(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productCategories.all(),
+        }),
+      ]);
     },
   });
 }

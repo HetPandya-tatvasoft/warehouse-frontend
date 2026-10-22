@@ -12,14 +12,23 @@ import { UIInput } from "@/components/common/UIInput/UIInput";
 import { UIErrorState } from "@/components/common/UIErrorState/UIErrorState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog/ConfirmDialog";
 
-import { ProductCategoryStatus, type ICategory } from "../types/product-categories.types";
+import {
+  ProductCategoryStatus,
+  type ICategory,
+} from "../types/product-categories.types";
 import type { IApiSuccessResponse } from "@/types/api.types";
 import { CategoryFormModal } from "./category-form-modal";
 import { MoveCategoryModal } from "./move-category-modal";
-import { useCategoryTree, useUpdateCategory, useDeleteCategory } from "../queries/product-categories.queries";
+import { CategoryAttributesModal } from "./category-attributes-modal";
+import {
+  useCategoryTree,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "../queries/product-categories.queries";
 import { CategoryTree } from "./category-tree";
 import { usePermissions, Page, Permission } from "@/permissions";
 import { TITLES } from "@/shared/constants/titles";
+import { MESSAGES } from "@/shared/constants/messages";
 
 // Helper to recursively collect all category IDs that have children
 const getAllIdsWithChildren = (nodes: ICategory[]): string[] => {
@@ -63,13 +72,21 @@ export function ProductCategoriesContainer() {
 
   // Dialog / Modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [selectedCategoryForEdit, setSelectedCategoryForEdit] = useState<ICategory | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<ICategory | null>(null);
+  const [selectedCategoryForEdit, setSelectedCategoryForEdit] =
+    useState<ICategory | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<ICategory | null>(
+    null,
+  );
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   // Move Category Modal state
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [movingCategory, setMovingCategory] = useState<ICategory | null>(null);
+
+  // Attributes Modal state
+  const [isAttributesModalOpen, setIsAttributesModalOpen] = useState(false);
+  const [selectedCategoryForAttributes, setSelectedCategoryForAttributes] =
+    useState<ICategory | null>(null);
 
   // Form parent category state
   const [formParentId, setFormParentId] = useState<string | null>(null);
@@ -83,7 +100,9 @@ export function ProductCategoriesContainer() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Expansion states
-  const [userExpandedIds, setUserExpandedIds] = useState<Set<string>>(new Set());
+  const [userExpandedIds, setUserExpandedIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Simulation parameters from URL query params (e.g. ?demo_loading=true)
   const demoLoading = searchParams.get("demo_loading") === "true";
@@ -91,7 +110,12 @@ export function ProductCategoriesContainer() {
   const demoEmpty = searchParams.get("demo_empty") === "true";
 
   // Real TanStack Query tree data source
-  const { data: response, isLoading: queryLoading, isError: queryError, error } = useCategoryTree();
+  const {
+    data: response,
+    isLoading: queryLoading,
+    isError: queryError,
+    error,
+  } = useCategoryTree();
   const { mutate: updateCategory } = useUpdateCategory();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
@@ -99,10 +123,11 @@ export function ProductCategoriesContainer() {
     if (queryError) {
       if (axios.isAxiosError(error)) {
         toast.error(
-          error.response?.data?.message || "Failed to load categories"
+          error.response?.data?.message ||
+            MESSAGES.PRODUCT_CATEGORIES.LOAD_FAILED,
         );
       } else {
-        toast.error("An unexpected error occurred while loading categories");
+        toast.error(MESSAGES.PRODUCT_CATEGORIES.LOAD_UNEXPECTED);
       }
     }
   }, [queryError, error]);
@@ -124,47 +149,55 @@ export function ProductCategoriesContainer() {
   }, [searchInput]);
 
   // Recursive search tree function. Collects auto-expanded IDs of ancestor nodes
-  const filterTreeAndGetAncestors = useCallback((
-    nodes: ICategory[],
-    term: string
-  ): { filteredNodes: ICategory[]; autoExpandedIds: Set<string> } => {
-    const autoExpandedIds = new Set<string>();
-    if (!term.trim()) {
-      return { filteredNodes: nodes, autoExpandedIds };
-    }
-
-    const lowercaseTerm = term.toLowerCase();
-
-    const filterNode = (node: ICategory, isParentMatch: boolean): ICategory | null => {
-      const isSelfMatch = node.name.toLowerCase().includes(lowercaseTerm);
-      const keepAllDescendants = isParentMatch || isSelfMatch;
-
-      const matchingChildren = node.children
-        ? node.children
-            .map((child) => filterNode(child, keepAllDescendants))
-            .filter((child): child is ICategory => child !== null)
-        : [];
-
-      const hasMatchingChildren = matchingChildren.length > 0;
-
-      if (isSelfMatch || hasMatchingChildren) {
-        if (hasMatchingChildren) {
-          autoExpandedIds.add(node.id);
-        }
-        return {
-          ...node,
-          children: keepAllDescendants ? node.children || [] : matchingChildren,
-        };
+  const filterTreeAndGetAncestors = useCallback(
+    (
+      nodes: ICategory[],
+      term: string,
+    ): { filteredNodes: ICategory[]; autoExpandedIds: Set<string> } => {
+      const autoExpandedIds = new Set<string>();
+      if (!term.trim()) {
+        return { filteredNodes: nodes, autoExpandedIds };
       }
-      return null;
-    };
 
-    const filteredNodes = nodes
-      .map((node) => filterNode(node, false))
-      .filter((node): node is ICategory => node !== null);
+      const lowercaseTerm = term.toLowerCase();
 
-    return { filteredNodes, autoExpandedIds };
-  }, []);
+      const filterNode = (
+        node: ICategory,
+        isParentMatch: boolean,
+      ): ICategory | null => {
+        const isSelfMatch = node.name.toLowerCase().includes(lowercaseTerm);
+        const keepAllDescendants = isParentMatch || isSelfMatch;
+
+        const matchingChildren = node.children
+          ? node.children
+              .map((child) => filterNode(child, keepAllDescendants))
+              .filter((child): child is ICategory => child !== null)
+          : [];
+
+        const hasMatchingChildren = matchingChildren.length > 0;
+
+        if (isSelfMatch || hasMatchingChildren) {
+          if (hasMatchingChildren) {
+            autoExpandedIds.add(node.id);
+          }
+          return {
+            ...node,
+            children: keepAllDescendants
+              ? node.children || []
+              : matchingChildren,
+          };
+        }
+        return null;
+      };
+
+      const filteredNodes = nodes
+        .map((node) => filterNode(node, false))
+        .filter((node): node is ICategory => node !== null);
+
+      return { filteredNodes, autoExpandedIds };
+    },
+    [],
+  );
 
   // Compute search-filtered tree and matching ancestors
   const { filteredNodes: filteredCategories, autoExpandedIds } = useMemo(() => {
@@ -174,7 +207,10 @@ export function ProductCategoriesContainer() {
   // Combined expansion state: user manual expanded items + auto-expanded matching paths during search
   const expandedIds = useMemo(() => {
     if (debouncedSearch.trim()) {
-      return new Set([...Array.from(userExpandedIds), ...Array.from(autoExpandedIds)]);
+      return new Set([
+        ...Array.from(userExpandedIds),
+        ...Array.from(autoExpandedIds),
+      ]);
     }
     return userExpandedIds;
   }, [userExpandedIds, autoExpandedIds, debouncedSearch]);
@@ -201,69 +237,75 @@ export function ProductCategoriesContainer() {
   }, []);
 
   // Action menu triggers
-  const handleActionClick = useCallback((action: string, category: ICategory) => {
-    switch (action) {
-      case "add_child":
-        setSelectedCategoryForEdit(null);
-        setFormParentId(category.id);
-        setFormParentName(category.name);
-        setIsFormModalOpen(true);
-        break;
-      case "edit":
-        setSelectedCategoryForEdit(category);
-        setFormParentId(null);
-        setFormParentName("");
-        setIsFormModalOpen(true);
-        break;
-      case "move":
-        setMovingCategory(category);
-        setIsMoveModalOpen(true);
-        break;
-      case "toggle_status":
-        if (statusTogglingId) return; // Prevent duplicate status toggling calls
-        const nextStatus =
-          category.status === ProductCategoryStatus.ACTIVE
-            ? ProductCategoryStatus.INACTIVE
-            : ProductCategoryStatus.ACTIVE;
+  const handleActionClick = useCallback(
+    (action: string, category: ICategory) => {
+      switch (action) {
+        case "add_child":
+          setSelectedCategoryForEdit(null);
+          setFormParentId(category.id);
+          setFormParentName(category.name);
+          setIsFormModalOpen(true);
+          break;
+        case "edit":
+          setSelectedCategoryForEdit(category);
+          setFormParentId(null);
+          setFormParentName("");
+          setIsFormModalOpen(true);
+          break;
+        case "move":
+          setMovingCategory(category);
+          setIsMoveModalOpen(true);
+          break;
+        case "attributes":
+          setSelectedCategoryForAttributes(category);
+          setIsAttributesModalOpen(true);
+          break;
+        case "toggle_status":
+          if (statusTogglingId) return; // Prevent duplicate status toggling calls
+          const nextStatus =
+            category.status === ProductCategoryStatus.ACTIVE
+              ? ProductCategoryStatus.INACTIVE
+              : ProductCategoryStatus.ACTIVE;
 
-        setStatusTogglingId(category.id);
-        updateCategory(
-          {
-            id: category.id,
-            payload: {
-              name: category.name,
-              description: category.description || undefined,
-              status: nextStatus,
+          setStatusTogglingId(category.id);
+          updateCategory(
+            {
+              id: category.id,
+              payload: {
+                name: category.name,
+                description: category.description || undefined,
+                status: nextStatus,
+              },
             },
-          },
-          {
-            onSuccess: (res: IApiSuccessResponse<ICategory>) => {
-              toast.success(
-                res?.message || `Category "${category.name}" status updated to ${nextStatus}.`
-              );
-              setStatusTogglingId(null);
+            {
+              onSuccess: (res: IApiSuccessResponse<ICategory>) => {
+                toast.success(res?.message);
+                setStatusTogglingId(null);
+              },
+              onError: (err: unknown) => {
+                if (axios.isAxiosError(err)) {
+                  toast.error(
+                    err.response?.data?.message ||
+                      MESSAGES.PRODUCT_CATEGORIES.UPDATE_FAILED,
+                  );
+                } else {
+                  toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
+                }
+                setStatusTogglingId(null);
+              },
             },
-            onError: (err: unknown) => {
-              if (axios.isAxiosError(err)) {
-                toast.error(
-                  err.response?.data?.message || "Failed to update category status."
-                );
-              } else {
-                toast.error("Something went wrong");
-              }
-              setStatusTogglingId(null);
-            },
-          }
-        );
-        break;
-      case "delete":
-        setDeletingCategory(category);
-        setIsConfirmDeleteOpen(true);
-        break;
-      default:
-        break;
-    }
-  }, [updateCategory, statusTogglingId]);
+          );
+          break;
+        case "delete":
+          setDeletingCategory(category);
+          setIsConfirmDeleteOpen(true);
+          break;
+        default:
+          break;
+      }
+    },
+    [updateCategory, statusTogglingId],
+  );
 
   const handleOpenCreateModal = useCallback(() => {
     setSelectedCategoryForEdit(null);
@@ -277,17 +319,18 @@ export function ProductCategoriesContainer() {
 
     deleteCategory(deletingCategory.id, {
       onSuccess: (res: IApiSuccessResponse<null>) => {
-        toast.success(
-          res?.message || `Category "${deletingCategory.name}" has been successfully deleted.`
-        );
+        toast.success(res?.message);
         setIsConfirmDeleteOpen(false);
         setDeletingCategory(null);
       },
       onError: (err: unknown) => {
         if (axios.isAxiosError(err)) {
-          toast.error(err.response?.data?.message || "Failed to delete category.");
+          toast.error(
+            err.response?.data?.message ||
+              MESSAGES.PRODUCT_CATEGORIES.DELETE_FAILED,
+          );
         } else {
-          toast.error("Something went wrong");
+          toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
         }
       },
     });
@@ -377,7 +420,8 @@ export function ProductCategoriesContainer() {
                       No categories yet
                     </h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-xs">
-                      Create your first product category to start building your category hierarchy.
+                      Create your first product category to start building your
+                      category hierarchy.
                     </p>
                     {can(Page.ProductCategories, Permission.CREATE) && (
                       <UIButton
@@ -449,6 +493,16 @@ export function ProductCategoriesContainer() {
             });
           }
         }}
+      />
+
+      {/* Attributes Management Modal */}
+      <CategoryAttributesModal
+        key={selectedCategoryForAttributes?.id ?? "none"}
+        open={isAttributesModalOpen}
+        onOpenChange={(open) => {
+          setIsAttributesModalOpen(open);
+        }}
+        category={selectedCategoryForAttributes}
       />
 
       {/* Confirmation Dialog Placeholder (Delete) */}

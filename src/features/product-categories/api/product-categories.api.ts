@@ -6,6 +6,9 @@ import type {
 } from "@/types/api.types";
 import type {
   ICategory,
+  ICategoryAttribute,
+  IEligibleAttribute,
+  IAssignCategoryAttributesPayload,
   IGetCategoriesParams,
   IUpsertCategoryPayload,
 } from "../types/product-categories.types";
@@ -75,4 +78,67 @@ export const productCategoriesApi = {
     );
     return response.data;
   },
+
+  getEffectiveAttributes: async (
+    categoryId: string,
+    cookieHeader?: string,
+  ): Promise<IApiSuccessResponse<ICategoryAttribute[]>> => {
+    const response = await apiClient.get<
+      IApiSuccessResponse<ICategoryAttribute[]>
+    >(`${API_ROUTES.PRODUCT_CATEGORIES}/${categoryId}/attributes/effective`, {
+      ...(cookieHeader ? { headers: { Cookie: cookieHeader } } : {}),
+    });
+    return response.data;
+  },
+
+  getDirectAttributes: async (
+    categoryId: string,
+    cookieHeader?: string,
+  ): Promise<IApiSuccessResponse<ICategoryAttribute[]>> => {
+    const response = await apiClient.get<
+      IApiSuccessResponse<ICategoryAttribute[]>
+    >(`${API_ROUTES.PRODUCT_CATEGORIES}/${categoryId}/attributes`, {
+      ...(cookieHeader ? { headers: { Cookie: cookieHeader } } : {}),
+    });
+    return response.data;
+  },
+
+  getEligibleAttributes: async (
+    categoryId: string,
+    cookieHeader?: string,
+  ): Promise<IApiSuccessResponse<IEligibleAttribute[]>> => {
+    const response = await apiClient.get<
+      IApiSuccessResponse<IEligibleAttribute[]>
+    >(`${API_ROUTES.PRODUCT_CATEGORIES}/${categoryId}/attributes/eligible`, {
+      ...(cookieHeader ? { headers: { Cookie: cookieHeader } } : {}),
+    });
+    return response.data;
+  },
+
+  assignCategoryAttributes: async ({
+    categoryId,
+    payload,
+  }: {
+    categoryId: string;
+    payload: IAssignCategoryAttributesPayload;
+  }): Promise<IApiSuccessResponse<ICategoryAttribute[]>> => {
+    const response = await apiClient.post<
+      IApiSuccessResponse<ICategoryAttribute[]>
+    >(`${API_ROUTES.PRODUCT_CATEGORIES}/${categoryId}/attributes`, payload);
+    return response.data;
+  },
+
+  unassignCategoryAttribute: async ({
+    categoryId,
+    attributeId,
+  }: {
+    categoryId: string;
+    attributeId: string;
+  }): Promise<IApiSuccessResponse<null>> => {
+    const response = await apiClient.delete<IApiSuccessResponse<null>>(
+      `${API_ROUTES.PRODUCT_CATEGORIES}/${categoryId}/attributes/${attributeId}`,
+    );
+    return response.data;
+  },
 };
+

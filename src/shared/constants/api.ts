@@ -13,5 +13,6 @@ export const API_ROUTES = {
   TENANTS_ONBOARD: "/platform/tenants/onboard",
   BRANCH_SWITCH: "/auth/switch-branch",
   PRODUCT_CATEGORIES: "/product-settings/categories",
-  PRODUCT_ATTRIBUTES: "/product-attributes",
+  PRODUCT_ATTRIBUTES: "/product-settings/attributes",
+  PRODUCT_BRANDS: "/product-settings/brands",
 } as const;

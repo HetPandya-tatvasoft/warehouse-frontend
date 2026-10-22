@@ -23,6 +23,30 @@ export const productCategoriesQueries = {
       queryKey: queryKeys.productCategories.tree(),
       queryFn: () => productCategoriesApi.getCategoryTree(cookieHeader),
     }),
+
+  effectiveAttributes: (categoryId: string, cookieHeader?: string) =>
+    apiQueryOptions({
+      queryKey: queryKeys.productCategories.effectiveAttributes(categoryId),
+      queryFn: () =>
+        productCategoriesApi.getEffectiveAttributes(categoryId, cookieHeader),
+      enabled: Boolean(categoryId),
+    }),
+
+  directAttributes: (categoryId: string, cookieHeader?: string) =>
+    apiQueryOptions({
+      queryKey: queryKeys.productCategories.attributes(categoryId),
+      queryFn: () =>
+        productCategoriesApi.getDirectAttributes(categoryId, cookieHeader),
+      enabled: Boolean(categoryId),
+    }),
+
+  eligibleAttributes: (categoryId: string, cookieHeader?: string) =>
+    apiQueryOptions({
+      queryKey: queryKeys.productCategories.eligibleAttributes(categoryId),
+      queryFn: () =>
+        productCategoriesApi.getEligibleAttributes(categoryId, cookieHeader),
+      enabled: Boolean(categoryId),
+    }),
 };
 
 function useCategoryMutation<TData, TVariables>(
@@ -71,3 +95,40 @@ export function useCategoryTree(options?: { enabled?: boolean }) {
     ...options,
   });
 }
+
+export function useCategoryEffectiveAttributes(
+  categoryId: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    ...productCategoriesQueries.effectiveAttributes(categoryId),
+    enabled: Boolean(categoryId) && options?.enabled !== false,
+  });
+}
+
+export function useCategoryDirectAttributes(
+  categoryId: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    ...productCategoriesQueries.directAttributes(categoryId),
+    enabled: Boolean(categoryId) && options?.enabled !== false,
+  });
+}
+
+export function useCategoryEligibleAttributes(
+  categoryId: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    ...productCategoriesQueries.eligibleAttributes(categoryId),
+    enabled: Boolean(categoryId) && options?.enabled !== false,
+  });
+}
+
+export const useAssignCategoryAttributes = () =>
+  useCategoryMutation(productCategoriesApi.assignCategoryAttributes);
+
+export const useUnassignCategoryAttribute = () =>
+  useCategoryMutation(productCategoriesApi.unassignCategoryAttribute);
+

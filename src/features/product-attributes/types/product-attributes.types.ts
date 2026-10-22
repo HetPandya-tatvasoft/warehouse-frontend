@@ -4,7 +4,7 @@ export enum ProductAttributeStatus {
 }
 
 export type AttributeSortField = "name" | "createdAt";
-export type AttributeValueSortField = "createdAt";
+export type AttributeValueSortField = "label" | "createdAt";
 export type SortOrder = "ASC" | "DESC";
 
 export interface IProductAttribute {

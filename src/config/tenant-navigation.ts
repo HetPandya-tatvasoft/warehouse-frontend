@@ -8,6 +8,7 @@ import {
   FolderTree,
   ArrowLeft,
   Tag,
+  Award,
   Scale,
   Percent,
 } from "lucide-react";
@@ -80,9 +81,10 @@ export const settingsNavigationGroups: NavGroup[] = [
       },
       {
         label: "Brands",
-        href: "/settings/product-settings/brands",
-        icon: Tag,
-        disabled: true,
+        href: PAGE_ROUTES.PRODUCT_BRANDS,
+        icon: Award,
+        page: Page.Brands,
+        permission: Permission.VIEW,
       },
       {
         label: "Units",

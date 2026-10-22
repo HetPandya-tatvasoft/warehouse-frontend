@@ -52,7 +52,6 @@ export function AttributeFormModal({
     control,
     reset,
     handleSubmit,
-    setError,
     formState: { errors },
   } = useForm<AttributeUpsertFormData>({
     resolver: zodResolver(attributeUpsertSchema),
@@ -86,57 +85,28 @@ export function AttributeFormModal({
       status: data.status,
     };
 
-    if (attribute?.id) {
-      updateAttribute(
-        { id: attribute.id, payload },
-        {
-          onSuccess: (res) => {
-            toast.success(
-              res?.message || MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_SUCCESS,
+    const options = {
+      onSuccess: (res: { message?: string }) => {
+        toast.success(res?.message);
+        onOpenChange(false);
+      },
+      onError: (error: unknown) => {
+        if (axios.isAxiosError<IApiErrorResponse>(error)) {
+          if (error.response?.status !== 403) {
+            toast.error(
+              error.response?.data?.message || MESSAGES.COMMON.UNEXPECTED_ERROR,
             );
-            onOpenChange(false);
-          },
-          onError: (error) => {
-            const message = axios.isAxiosError<IApiErrorResponse>(error)
-              ? error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_FAILED
-              : MESSAGES.COMMON.UNEXPECTED_ERROR;
-            setError("root", { message });
-            if (
-              !(
-                axios.isAxiosError<unknown>(error) &&
-                error.response?.status === 403
-              )
-            ) {
-              toast.error(message);
-            }
-          },
-        },
-      );
-    } else {
-      createAttribute(payload, {
-        onSuccess: (res) => {
-          toast.success(
-            res?.message || MESSAGES.PRODUCT_ATTRIBUTES.CREATE_SUCCESS,
-          );
-          onOpenChange(false);
-        },
-        onError: (error) => {
-          const message = axios.isAxiosError<IApiErrorResponse>(error)
-            ? error.response?.data?.message ||
-              MESSAGES.PRODUCT_ATTRIBUTES.CREATE_FAILED
-            : MESSAGES.COMMON.UNEXPECTED_ERROR;
-          setError("root", { message });
-          if (
-            !(
-              axios.isAxiosError<unknown>(error) &&
-              error.response?.status === 403
-            )
-          ) {
-            toast.error(message);
           }
-        },
-      });
+        } else {
+          toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
+        }
+      },
+    };
+
+    if (attribute?.id) {
+      updateAttribute({ id: attribute.id, payload }, options);
+    } else {
+      createAttribute(payload, options);
     }
   };
 
@@ -153,8 +123,8 @@ export function AttributeFormModal({
       }
       description={
         isEditing
-          ? "Update the details for this attribute."
-          : "Add a new product attribute."
+          ? MESSAGES.PRODUCT_ATTRIBUTES.MODAL_EDIT_DESCRIPTION
+          : MESSAGES.PRODUCT_ATTRIBUTES.MODAL_CREATE_DESCRIPTION
       }
       closeOnBackdropClick={!isPending}
       closeOnEscape={!isPending}
@@ -211,12 +181,6 @@ export function AttributeFormModal({
             />
           )}
         />
-
-        {errors.root?.message && (
-          <p role="alert" className="text-sm text-destructive">
-            {errors.root.message}
-          </p>
-        )}
       </form>
     </UIModal>
   );

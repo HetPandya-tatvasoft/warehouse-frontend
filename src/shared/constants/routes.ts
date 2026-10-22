@@ -10,6 +10,7 @@ export const PAGE_ROUTES = {
   WAREHOUSES_CREATE: "/warehouses/create",
   PRODUCT_CATEGORIES: "/settings/product-settings/categories",
   PRODUCT_ATTRIBUTES: "/settings/product-settings/attributes",
+  PRODUCT_BRANDS: "/settings/product-settings/brands",
   SETTINGS: "/settings",
   UNAUTHORIZED: "/unauthorized",
   PLATFORM_DASHBOARD: "/platform/dashboard",

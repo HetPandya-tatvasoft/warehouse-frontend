@@ -55,7 +55,6 @@ export function AttributeValueFormModal({
     control,
     reset,
     handleSubmit,
-    setError,
     formState: { errors },
   } = useForm<AttributeValueUpsertFormData>({
     resolver: zodResolver(attributeValueUpsertSchema),
@@ -89,60 +88,31 @@ export function AttributeValueFormModal({
       status: data.status,
     };
 
+    const options = {
+      onSuccess: (res: { message?: string }) => {
+        toast.success(res?.message);
+        onOpenChange(false);
+      },
+      onError: (error: unknown) => {
+        if (axios.isAxiosError<IApiErrorResponse>(error)) {
+          if (error.response?.status !== 403) {
+            toast.error(
+              error.response?.data?.message || MESSAGES.COMMON.UNEXPECTED_ERROR,
+            );
+          }
+        } else {
+          toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
+        }
+      },
+    };
+
     if (value?.id) {
       updateAttributeValue(
         { attributeId: parent.id, id: value.id, payload },
-        {
-          onSuccess: (res) => {
-            toast.success(
-              res?.message || MESSAGES.PRODUCT_ATTRIBUTE_VALUES.UPDATE_SUCCESS,
-            );
-            onOpenChange(false);
-          },
-          onError: (error) => {
-            const message = axios.isAxiosError<IApiErrorResponse>(error)
-              ? error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTE_VALUES.UPDATE_FAILED
-              : MESSAGES.COMMON.UNEXPECTED_ERROR;
-            setError("root", { message });
-            if (
-              !(
-                axios.isAxiosError<unknown>(error) &&
-                error.response?.status === 403
-              )
-            ) {
-              toast.error(message);
-            }
-          },
-        },
+        options,
       );
     } else {
-      createAttributeValue(
-        { attributeId: parent.id, payload },
-        {
-          onSuccess: (res) => {
-            toast.success(
-              res?.message || MESSAGES.PRODUCT_ATTRIBUTE_VALUES.CREATE_SUCCESS,
-            );
-            onOpenChange(false);
-          },
-          onError: (error) => {
-            const message = axios.isAxiosError<IApiErrorResponse>(error)
-              ? error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTE_VALUES.CREATE_FAILED
-              : MESSAGES.COMMON.UNEXPECTED_ERROR;
-            setError("root", { message });
-            if (
-              !(
-                axios.isAxiosError<unknown>(error) &&
-                error.response?.status === 403
-              )
-            ) {
-              toast.error(message);
-            }
-          },
-        },
-      );
+      createAttributeValue({ attributeId: parent.id, payload }, options);
     }
   };
 
@@ -157,7 +127,7 @@ export function AttributeValueFormModal({
           ? TITLES.PRODUCT_ATTRIBUTES.EDIT_VALUE
           : TITLES.PRODUCT_ATTRIBUTES.CREATE_NEW_VALUE
       }
-      description="Manage a value for this attribute."
+      description={MESSAGES.PRODUCT_ATTRIBUTE_VALUES.MODAL_DESCRIPTION}
       closeOnBackdropClick={!isPending}
       closeOnEscape={!isPending}
       showCloseButton={!isPending}
@@ -215,12 +185,6 @@ export function AttributeValueFormModal({
             />
           )}
         />
-
-        {errors.root?.message && (
-          <p role="alert" className="text-sm text-destructive">
-            {errors.root.message}
-          </p>
-        )}
       </form>
     </UIModal>
   );

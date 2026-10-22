@@ -39,7 +39,7 @@ export function CommonTableHeader<TData>({ table }: Props<TData>) {
                 aria-sort={sortDirection}
               >
                 {!header.isPlaceholder && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5 w-full">
                     {/* Column label */}
                     {flexRender(
                       header.column.columnDef.header,
