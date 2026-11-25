@@ -11,6 +11,7 @@ export const PAGE_ROUTES = {
   PRODUCT_CATEGORIES: "/settings/product-settings/categories",
   PRODUCT_ATTRIBUTES: "/settings/product-settings/attributes",
   PRODUCT_BRANDS: "/settings/product-settings/brands",
+  PRODUCT_UNITS_OF_MEASURE: "/settings/product-settings/units-of-measure",
   SETTINGS: "/settings",
   UNAUTHORIZED: "/unauthorized",
   PLATFORM_DASHBOARD: "/platform/dashboard",

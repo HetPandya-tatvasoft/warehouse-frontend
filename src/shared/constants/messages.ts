@@ -146,4 +146,27 @@ export const MESSAGES = {
       NAME_MAX_LENGTH: "Brand name cannot exceed 150 characters",
     },
   },
+  PRODUCT_UNITS_OF_MEASURE: {
+    LOAD_FAILED: "Failed to fetch units of measure",
+    LOAD_UNEXPECTED: "An unexpected error occurred while loading units of measure",
+    CREATE_SUCCESS: "Unit of measure created successfully",
+    UPDATE_SUCCESS: "Unit of measure updated successfully",
+    DELETE_SUCCESS: "Unit of measure deleted successfully",
+    CREATE_FAILED: "Failed to create unit of measure",
+    UPDATE_FAILED: "Failed to update unit of measure",
+    DELETE_FAILED: "Failed to delete unit of measure",
+    STATUS_ACTIVATED: "Unit of measure activated successfully",
+    STATUS_DEACTIVATED: "Unit of measure deactivated successfully",
+    EMPTY_STATE: "No units of measure found.",
+    EMPTY_SEARCH_STATE:
+      "No matching units of measure found. Try adjusting your search or filters.",
+    MODAL_CREATE_DESCRIPTION: "Add a new unit of measure.",
+    MODAL_EDIT_DESCRIPTION: "Update the details for this unit of measure.",
+    VALIDATION: {
+      NAME_REQUIRED: "Unit name is required",
+      NAME_MAX_LENGTH: "Unit name cannot exceed 150 characters",
+      CODE_REQUIRED: "Unit code is required",
+      CODE_MAX_LENGTH: "Unit code cannot exceed 20 characters",
+    },
+  },
 } as const;

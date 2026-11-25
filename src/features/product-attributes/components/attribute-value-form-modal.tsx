@@ -95,11 +95,9 @@ export function AttributeValueFormModal({
       },
       onError: (error: unknown) => {
         if (axios.isAxiosError<IApiErrorResponse>(error)) {
-          if (error.response?.status !== 403) {
-            toast.error(
-              error.response?.data?.message || MESSAGES.COMMON.UNEXPECTED_ERROR,
-            );
-          }
+          toast.error(
+            error.response?.data?.message || MESSAGES.COMMON.UNEXPECTED_ERROR,
+          );
         } else {
           toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
         }

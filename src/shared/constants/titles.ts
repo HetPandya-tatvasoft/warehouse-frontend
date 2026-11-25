@@ -55,4 +55,9 @@ export const TITLES = {
     CREATE_NEW_BRAND: "Create New Brand",
     EDIT_BRAND: "Edit Brand",
   },
+  PRODUCT_UNITS_OF_MEASURE: {
+    UOM_MANAGEMENT: "Unit of Measure Management",
+    CREATE_NEW_UOM: "Create New Unit of Measure",
+    EDIT_UOM: "Edit Unit of Measure",
+  },
 } as const;

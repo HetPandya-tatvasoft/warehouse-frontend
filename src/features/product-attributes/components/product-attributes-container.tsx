@@ -118,27 +118,6 @@ export function ProductAttributesContainer() {
 
   const isPendingAction = isUpdating || isDeleting;
 
-  // Beyond-last page recovery
-  useEffect(() => {
-    if (
-      !query.isFetching &&
-      !query.isError &&
-      query.data &&
-      query.data.page === controls.page
-    ) {
-      const lastPage = Math.max(1, query.data.totalPages);
-      if (controls.page > lastPage) {
-        updateQueryParams({ page: lastPage });
-      }
-    }
-  }, [
-    query.isFetching,
-    query.isError,
-    query.data,
-    controls.page,
-    updateQueryParams,
-  ]);
-
   // Display query errors through toast
   useEffect(() => {
     if (query.isError) {
@@ -197,15 +176,10 @@ export function ProductAttributesContainer() {
           onError: (error) => {
             setStatusTogglingId(null);
             if (axios.isAxiosError<IApiErrorResponse>(error)) {
-              if (error.response?.status !== 403) {
-                toast.error(
-                  error.response?.data?.message ||
-                    MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_FAILED,
-                );
-              }
-              if (error.response?.status === 404) {
-                void query.refetch();
-              }
+              toast.error(
+                error.response?.data?.message ||
+                  MESSAGES.PRODUCT_ATTRIBUTES.UPDATE_FAILED,
+              );
             } else {
               toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
             }
@@ -219,7 +193,6 @@ export function ProductAttributesContainer() {
       isPendingAction,
       statusTogglingId,
       updateAttribute,
-      query,
     ],
   );
 
@@ -234,15 +207,10 @@ export function ProductAttributesContainer() {
       },
       onError: (error) => {
         if (axios.isAxiosError<IApiErrorResponse>(error)) {
-          if (error.response?.status !== 403) {
-            toast.error(
-              error.response?.data?.message ||
-                MESSAGES.PRODUCT_ATTRIBUTES.DELETE_FAILED,
-            );
-          }
-          if (error.response?.status === 404) {
-            void query.refetch();
-          }
+          toast.error(
+            error.response?.data?.message ||
+              MESSAGES.PRODUCT_ATTRIBUTES.DELETE_FAILED,
+          );
         } else {
           toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
         }
@@ -254,7 +222,6 @@ export function ProductAttributesContainer() {
     canDelete,
     isPendingAction,
     deleteAttribute,
-    query,
   ]);
 
   const columns = useMemo<ColumnDef<IProductAttribute>[]>(() => {

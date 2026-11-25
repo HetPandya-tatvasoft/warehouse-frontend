@@ -10,6 +10,11 @@ export const queryKeys = {
     list: <T extends object>(params?: T) => ["brands", "list", params] as const,
     detail: (id: string) => ["brands", "detail", id] as const,
   },
+  unitsOfMeasure: {
+    all: () => ["units-of-measure"] as const,
+    list: <T extends object>(params?: T) => ["units-of-measure", "list", params] as const,
+    detail: (id: string) => ["units-of-measure", "detail", id] as const,
+  },
   auth: {
     currentUser: () => ["current-user"] as const,
   },

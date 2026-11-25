@@ -1,3 +1,5 @@
+export const API_BASE_URL = "/api";
+
 export const API_ROUTES = {
   LOGIN: "/auth/login",
   LOGOUT: "/auth/logout",
@@ -15,4 +17,5 @@ export const API_ROUTES = {
   PRODUCT_CATEGORIES: "/product-settings/categories",
   PRODUCT_ATTRIBUTES: "/product-settings/attributes",
   PRODUCT_BRANDS: "/product-settings/brands",
+  PRODUCT_UNITS_OF_MEASURE: "/product-settings/units-of-measure",
 } as const;

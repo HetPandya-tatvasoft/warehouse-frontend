@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import { env } from "@/lib/env";
+import { API_BASE_URL } from "@/shared/constants/api";
 
 export const apiClient = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -11,6 +11,6 @@ export const apiClient = axios.create({
 });
 
 export const refreshClient = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });

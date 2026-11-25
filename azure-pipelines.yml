@@ -32,7 +32,6 @@ steps:
         echo "Resolved backend URL: $BACKEND_URL"
 
         docker build \
-          --build-arg NEXT_PUBLIC_API_URL=/api \
           --build-arg BACKEND_INTERNAL_URL=$BACKEND_URL \
           -t $ACR_LOGIN_SERVER/$(imageName):$(Build.SourceVersion) \
           -f Dockerfile \

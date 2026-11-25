@@ -108,27 +108,6 @@ export function BrandsContainer() {
 
   const isPendingAction = isUpdating || isDeleting;
 
-  // Beyond-last page recovery
-  useEffect(() => {
-    if (
-      !query.isFetching &&
-      !query.isError &&
-      query.data &&
-      query.data.page === controls.page
-    ) {
-      const lastPage = Math.max(1, query.data.totalPages);
-      if (controls.page > lastPage) {
-        updateQueryParams({ page: lastPage });
-      }
-    }
-  }, [
-    query.isFetching,
-    query.isError,
-    query.data,
-    controls.page,
-    updateQueryParams,
-  ]);
-
   // Error toast notification
   useEffect(() => {
     if (query.isError) {
@@ -190,15 +169,10 @@ export function BrandsContainer() {
           onError: (error) => {
             setStatusTogglingId(null);
             if (axios.isAxiosError<IApiErrorResponse>(error)) {
-              if (error.response?.status !== 403) {
-                toast.error(
-                  error.response?.data?.message ||
-                    MESSAGES.PRODUCT_BRANDS.UPDATE_FAILED,
-                );
-              }
-              if (error.response?.status === 404) {
-                void query.refetch();
-              }
+              toast.error(
+                error.response?.data?.message ||
+                  MESSAGES.PRODUCT_BRANDS.UPDATE_FAILED,
+              );
             } else {
               toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
             }
@@ -206,7 +180,7 @@ export function BrandsContainer() {
         },
       );
     },
-    [canView, canUpdate, isPendingAction, statusTogglingId, updateBrand, query],
+    [canView, canUpdate, isPendingAction, statusTogglingId, updateBrand],
   );
 
   const handleConfirmDelete = useCallback(() => {
@@ -220,21 +194,16 @@ export function BrandsContainer() {
       },
       onError: (err) => {
         if (axios.isAxiosError<IApiErrorResponse>(err)) {
-          if (err.response?.status !== 403) {
-            toast.error(
-              err.response?.data?.message ||
-                MESSAGES.PRODUCT_BRANDS.DELETE_FAILED,
-            );
-          }
-          if (err.response?.status === 404) {
-            void query.refetch();
-          }
+          toast.error(
+            err.response?.data?.message ||
+              MESSAGES.PRODUCT_BRANDS.DELETE_FAILED,
+          );
         } else {
           toast.error(MESSAGES.COMMON.UNEXPECTED_ERROR);
         }
       },
     });
-  }, [deletingBrand, canView, canDelete, isPendingAction, deleteBrand, query]);
+  }, [deletingBrand, canView, canDelete, isPendingAction, deleteBrand]);
 
   const columns = useMemo<ColumnDef<IBrand>[]>(() => {
     return [
